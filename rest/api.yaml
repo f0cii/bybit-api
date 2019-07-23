@@ -1,0 +1,571 @@
+openapi: 3.0.0
+info:
+    version: 1.1.0
+    title: Bybit
+    description: |
+        ## Overview
+        bybit-official-api-docs
+servers:
+    -   url: 'https://api-testnet.bybit.com'
+        description: For Testnet
+    -   url: ' https://api.bybit.com'
+        description: For Mainnet
+
+x-tagGroups:
+    -   name: Public Rest API1
+        tags:
+            - public
+    -   name: Private Rest API
+        tags:
+            - order
+
+paths:
+    # v1版本接口
+    open-api/order/create:
+        post:
+            summary: place an order(will deprecat)
+            #deprecated: true
+            tags:
+                - order
+            description: |
+                Parameters of 'side', 'symbol', 'order_type', 'qty', 'price', 'time_in_force' are required for all active orders. Other parameters are optional unless specified.
+
+                Market price active order: A traditional market price order, will be filled at the best available price. 'price' and 'time_in_force' can set to be "" if and only if you are placing market price order.
+
+                Limit price active order: You can set an execution price for your order. Only when last traded price reaches the order price, the system will fill your order.
+
+                Take profit/Stop loss: You may only set a take-profit/stop-loss conditional order upon opening the position. Once you hold a position, the take profit and stop loss information u sent when placing an order will no longer be valid.
+
+                Order quantity: This parameter indicates the quantity of perpetual contracts you want to buy or sell, currently Bybit only support order quantity in an integer.
+
+                Order price: This parameter indicates the price of perpetual contracts you want to buy or sell, currently Bybit only support price increment of every 0.5.
+
+                Customize conditional order ID: You may customize order IDs for active orders. We will link it to the system order ID , and return the unique system order ID to you after the active order is created successfully. You may use this order ID to cancel your active order. The customized order ID is asked to be unique, with a maximum length of 36 characters.
+
+                Note: Each account can hold up to 200 active orders yet to be filled entirely simultaneously.
+
+            requestBody:
+                $ref: '#/components/requestBodies/CreateOrderReqV1'
+            responses:
+                200:
+                    description: cancel order response
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    -   $ref: '#/components/schemas/CreateOrderRespV1'
+                                    -   $ref: '#/components/schemas/ErrorResponse'
+
+    # v2版本接口
+    
+    v2/public/symbols:
+        get:
+            operationId: query_symbol
+            summary: symbol
+            tags: 
+                - public
+            description: Query Symbols
+            responses:
+                200:
+                    description: response
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    -   $ref: '#/components/schemas/QuerySymbolResp'
+                                    -   $ref: '#/components/schemas/ErrorResponse'
+
+    v2/public/kline/list:
+        get:
+            operationId: query_kline
+            summary: kline
+            tags:
+                - public
+            description: Query historical kline.
+            parameters:
+                -   $ref: '#/components/parameters/symbol_in_path'
+                -   $ref: '#/components/parameters/interval'
+                -   $ref: '#/components/parameters/from'
+                -   $ref: '#/components/parameters/limit'
+            responses:
+                200:
+                    description: response
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    -   $ref: '#/components/schemas/QueryKLineResp'
+                                    -   $ref: '#/components/schemas/ErrorResponse'
+
+    v2/private/order/create:
+        post:
+            tags:
+                - order
+            summary: Place an order V2(developing)
+            operationId: create_order
+            requestBody:
+                $ref: '#/components/requestBodies/CreateOrderReqV2'
+            responses:
+                200:
+                    description: response
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    -   $ref: '#/components/schemas/CreateOrderRespV2'
+                                    -   $ref: '#/components/schemas/ErrorResponse'
+
+    v2/private/order/cancel:
+        post:
+            tags:
+                - order
+            summary: Cancel an order V2(developing)
+            requestBody:
+                $ref: '#/components/requestBodies/CancelOrderReq'
+            responses:
+                200:
+                    description: cancel order response
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    -   $ref: '#/components/schemas/CancelOrderResp'
+                                    -   $ref: '#/components/schemas/ErrorResponse'
+
+components:
+    parameters:
+        symbol_in_query:
+            name: symbol
+            in: query
+            required: true
+            schema:
+                $ref: '#/components/schemas/Symbol'
+
+        symbol_in_path:
+            name: symbol
+            in: path
+            required: true
+            schema:
+                $ref: '#/components/schemas/Symbol'
+
+        side_in_query:
+            name: side
+            in: query
+            required: true
+            schema:
+                $ref: '#/components/schemas/Side'
+
+        order_type_in_query:
+            name: order_type
+            in: query
+            required: true
+            schema:
+                $ref: '#/components/schemas/OrderType'
+
+        interval:
+            name: interval
+            in: query
+            required: true
+            schema:
+                $ref: '#/components/schemas/Interval'
+
+        from:
+            name: from
+            in: query
+            required: true
+            schema:
+                type: integer
+        limit:
+            name: limit
+            in: query
+            description: less than or equal 200
+            schema:
+                type: integer
+
+    requestBodies:
+        CreateOrderReqV1:
+            content:
+                application/x-www-form-urlencoded:
+                    schema:
+                        $ref: '#/components/schemas/CreateOrderReqV1'
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/CreateOrderReqV1'
+
+        CreateOrderReqV2:
+            content:
+                application/x-www-form-urlencoded:
+                    schema:
+                        $ref: '#/components/schemas/CreateOrderReqV2'
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/CreateOrderReqV2'
+
+        CancelOrderReq:
+            content:
+                application/x-www-form-urlencoded:
+                    schema:
+                        $ref: '#/components/schemas/CancelOrderReq'
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/CancelOrderReq'
+
+    schemas:
+        # Enum
+        Symbol:
+            type: string
+            enum:
+                - BTCUSD
+                - ETHUSD
+                - XRPUSD
+                - EOSUSD
+
+        Side:
+            type: string
+            enum:
+                - Buy
+                - Sell
+
+        OrderType:
+            type: string
+            enum:
+                - Market
+                - Limit
+
+        TimeInForce:
+            type: string
+            enum:
+                - GoodTillCancel
+                - ImmediateOrCancel
+                - FillOrKill
+                - PostOnly
+
+        Interval:
+            type: string
+            enum:
+                - 1
+                - 3
+                - 5
+                - 15
+                - 30
+                - 60
+                - 120
+                - 240
+                - 360
+                - 720
+                - D
+                - M
+                - W
+                - Y
+
+        OrderStatus:
+            type: string
+            enum: [Rejected, New, PartiallyFilled, Filled, Cancelled]
+
+        # Requests
+        CreateOrderReqV1:
+            type: object
+            properties:
+                symbol:
+                    $ref: '#/components/schemas/Symbol'
+                side:
+                    $ref: '#/components/schemas/Side'
+                order_type:
+                    $ref: '#/components/schemas/OrderType'
+                qty:
+                    type: int64
+                    example: 10
+                price:
+                    type: number
+                    example: 5000.5
+                time_in_force:
+                    $ref: '#/components/schemas/TimeInForce'
+                take_profit:
+                    type: number
+                    example: 5001
+                stop_loss:
+                    type: number
+                    example: 4500.5
+                order_link_id:
+                    type: string
+                    example: abcd-1234
+            required:
+                - side
+                - symbol
+                - order_type
+                - qty
+                - price
+                - time_in_force
+
+        CreateOrderReqV2:
+            type: object
+            properties:
+                symbol:
+                    $ref: '#/components/schemas/Symbol'
+                side:
+                    $ref: '#/components/schemas/Side'
+                order_type:
+                    $ref: '#/components/schemas/OrderType'
+                qty:
+                    type: int64
+                    example: 10
+                price:
+                    type: number
+                    example: 5000.5
+                time_in_force:
+                    $ref: '#/components/schemas/TimeInForce'
+                order_link_id:
+                    type: string
+                    example: abcd-1234
+
+        CancelOrderReq:
+            type: object
+            properties:
+                order_id:
+                    type: string
+                    example: 1234-abcd
+
+        # Responses
+        
+        SuccessResponse:
+            type: object
+            properties:
+                ret_code:
+                    type: integer
+                    description: ret_code
+                    example: 0
+                ret_msg:
+                    type: string
+                    description: 'will always be ok'
+                    example: 'ok'
+                time_now:
+                    type: string
+                    description: utc timestamp of server
+                    example: '1539778407.210858'
+
+            required:
+                - ret_code
+
+        ErrorResponse:
+            type: object
+            properties:
+                ret_code:
+                    type: integer
+                    description: ret_code
+                    example: -1
+                ret_msg:
+                    type: string
+                    description: Error message.
+                    example: 'An error occurred.'
+                ext_code:
+                    type: string
+                    example: ''
+                result:
+                    type: object
+                    description: 'will be Null'
+                    example: null
+                time_now:
+                    type: string
+                    description: utc timestamp of server
+                    example: '1539778407.210858'
+            required:
+                - ret_code
+                - ret_msg
+
+        QuerySymbolResp:
+            allOf:
+                -   $ref: '#/components/schemas/SuccessResponse'
+                -   type: object
+                    properties:
+                        result:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/SymbolInfo'
+
+        QueryKLineResp:
+            allOf:
+                -   $ref: '#/components/schemas/SuccessResponse'
+                -   type: object
+                    properties:
+                        result:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/KLine'
+                    required:
+                        - result
+
+        CreateOrderRespV1:
+            allOf:
+                -   $ref: '#/components/schemas/SuccessResponse'
+                -   type: object
+                    properties:
+                        result:
+                            type: object
+                            properties:
+                                order_id:
+                                    type: string
+                                    example: abcd-1234
+                                user_id:
+                                    type: number
+                                    example: 1234
+                                side:
+                                    $ref: '#/components/schemas/Side'
+                                order_type:
+                                    $ref: '#/components/schemas/OrderType'
+                                price:
+                                    type: number
+                                    example: 5000.05
+                                qty:
+                                    type: number
+                                    example: 100
+                                time_in_force:
+                                    $ref: '#/components/schemas/TimeInForce'
+                                order_status:
+                                    $ref: '#/components/schemas/OrderStatus'
+                                last_exec_time:
+                                    type: number
+                                    example: 0.000000
+                                last_exec_price:
+                                    type: number
+                                    example: 0
+                                leaves_qty:
+                                    type: number
+                                    example: 0
+                                cum_exec_qty:
+                                    type: number
+                                    example: 0
+                                cum_exec_value:
+                                    type: number
+                                    example: 0
+                                cum_exec_fee:
+                                    type: number
+                                    example: 0
+                                reject_reason:
+                                    type: string
+                                    example: ""
+                                order_link_id:
+                                    type: string
+                                    example: ""
+                                created_at:
+                                    type: string
+                                    example: 2018-10-15T04:12:19.000Z
+                                updated_at:
+                                    type: string
+                                    example: 2018-10-15T04:12:19.000Z
+
+        CreateOrderRespV2:
+            allOf:
+                -   $ref: '#/components/schemas/SuccessResponse'
+                -   type: object
+                    properties:
+                        result:
+                            type: object
+                            properties:
+                                order_id:
+                                    type: string
+                                    example: 1234-abcd
+
+        CancelOrderResp:
+            allOf:
+                -   $ref: '#/components/schemas/SuccessResponse'
+                -   type: object
+                    properties:
+                        result:
+                            type: string
+                            nullable: true
+                            example: null
+
+        # Model
+        
+        SymbolInfo:
+            type: object
+            properties:
+                name:
+                    type: string
+                    example: BTCUSD
+                base_currency:
+                    type: string
+                    example: BTC
+                    description: >
+                        For currency pairs only. This field contains the first currency of the pair. 
+                        For example, base currency for `BTCUSD` ticker is `BTC`.
+                quote_currency:
+                    type: string
+                    example: USD
+                    description:
+                        For example, quote currency for `BTCUSD` ticker is `USD`.
+                price_scale:
+                    type: number
+                    example: 2
+                    description: >
+                        Indicates how many decimal points the price has.
+                        For example, if the price has 2 decimal points (ex., 300.01), then `price_scale` is `2`. 
+                        If it has 3 decimals, then `prices_cale` is `3` etc.
+                price_filter:
+                    type: object
+                    properties:
+                        min_price:
+                            type: number
+                            example: 0.50
+                            description: when place an order, the min price should be greater than last_price/10
+                        max_price:
+                            type: number
+                            example: 1000000
+                        tick_size:
+                            type: number
+                            example: 0.50
+                lot_size_filter:
+                    type: object
+                    properties:
+                        min_trading_qty:
+                            type: number
+                            example: 1
+                        max_trading_qty:
+                            type: number
+                            example: 1000000
+                        qty_step:
+                            type: number
+                            example: 1
+        
+        KLine:
+            type: object
+            properties:
+                symbol:
+                    allOf:
+                        -   $ref: '#/components/schemas/Symbol'
+                interval:
+                    type: string
+                    enum:
+                        - 1
+                        - 3
+                        - 5
+                        - 15
+                        - 30
+                        - 60
+                        - 120
+                        - 240
+                        - 360
+                        - 720
+                        - D
+                        - M
+                        - W
+                        - Y
+                open_time:
+                    type: integer
+                    example: 1553846940
+                open:
+                    type: string
+                    example: "5000.5"
+                high:
+                    type: string
+                    example: "5500.5"
+                low:
+                    type: string
+                    example: "4500"
+                close:
+                    type: string
+                    example: "5000.5"
+                volume:
+                    type: string
+                    example: "1100"
+
