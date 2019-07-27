@@ -10,7 +10,7 @@ func main() {
 		Addr:          ws.HostTestnet, // 测试网络
 		ApiKey:        "wKuYtkeNdC2PaMKjoy",
 		SecretKey:     "5ekcDn3KnKoCRbfvrPImYzVdx7Ri2hhVxkmw",
-		AutoReconnect: true, // 短线自动重连
+		AutoReconnect: true, // 断线自动重连
 		DebugMode:     true,
 	}
 	b := ws.New(cfg)
