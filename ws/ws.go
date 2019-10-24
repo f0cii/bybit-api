@@ -237,7 +237,7 @@ func (b *ByBitWS) ping() {
 
 func (b *ByBitWS) Auth() error {
 	// 单位:毫秒
-	expires := time.Now().Unix()*1000 + 1000
+	expires := time.Now().Unix()*1000 + 10000
 	req := fmt.Sprintf("GET/realtime%d", expires)
 	sig := hmac.New(sha256.New, []byte(b.cfg.SecretKey))
 	sig.Write([]byte(req))
