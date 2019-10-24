@@ -120,7 +120,7 @@ func (b *ByBit) getOrders(orderID string, orderLinkID string, sort string, order
 	params["page"] = page
 	params["limit"] = limit
 	if orderStatus != "" {
-		params["orderStatus"] = orderStatus
+		params["order_status"] = orderStatus
 	}
 	err = b.SignedRequest(http.MethodGet, "open-api/order/list", params, &cResult)
 	if err != nil {
