@@ -211,7 +211,7 @@ func (b *ByBitWS) handleDisconnected() {
 func (b *ByBitWS) connect() (*websocket.Conn, *http.Response, error) {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	//defer cancel()
-	c, resp, err := websocket.Dial(ctx, b.cfg.Addr, websocket.DialOptions{})
+	c, resp, err := websocket.Dial(ctx, b.cfg.Addr, &websocket.DialOptions{})
 	return c, resp, err
 }
 

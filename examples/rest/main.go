@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/sumorf/bybit-api/rest"
+	"github.com/frankrap/bybit-api/rest"
 	"log"
 )
 

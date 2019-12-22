@@ -8,7 +8,7 @@ Go library for using the ByBit's Rest &amp; Websocket API
 package main
 
 import (
-	"github.com/sumorf/bybit-api/rest"
+	"github.com/frankrap/bybit-api/rest"
 	"log"
 )
 
@@ -49,7 +49,7 @@ func main() {
 package main
 
 import (
-	"github.com/sumorf/bybit-api/ws"
+	"github.com/frankrap/bybit-api/ws"
 	"log"
 )
 
