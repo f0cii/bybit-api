@@ -96,11 +96,13 @@ func (b *ByBit) GetWalletBalance(coin string) (result Balance, err error) {
 // CreateOrder 创建委托单
 // symbol: 产品类型, 有效选项:BTCUSD,ETHUSD (BTCUSD ETHUSD)
 // side: 方向, 有效选项:Buy, Sell (Buy Sell)
-// orderType: 产品类型, 有效选项:BTCUSD,ETHUSD (BTCUSD ETHUSD)
+// orderType: Limit/Market
 // price: 委托价格, 在没有仓位时，做多的委托价格需高于市价的10%、低于1百万。如有仓位时则需优于强平价。单笔价格增减最小单位为0.5。
 // qty: 委托数量, 单笔最大1百万
 // timeInForce: 执行策略, 有效选项:GoodTillCancel,ImmediateOrCancel,FillOrKill,PostOnly
-func (b *ByBit) CreateOrder(side string, orderType string, price float64, qty int, timeInForce string, symbol string) (result Order, err error) {
+// reduceOnly: 只减仓
+// symbol: 产品类型, 有效选项:BTCUSD,ETHUSD (BTCUSD ETHUSD)
+func (b *ByBit) CreateOrder(side string, orderType string, price float64, qty int, timeInForce string, reduceOnly bool, symbol string) (result Order, err error) {
 	var cResult CreateOrderResult
 	params := map[string]interface{}{}
 	params["side"] = side
@@ -109,6 +111,9 @@ func (b *ByBit) CreateOrder(side string, orderType string, price float64, qty in
 	params["qty"] = qty
 	params["price"] = price
 	params["time_in_force"] = timeInForce
+	if reduceOnly {
+		params["reduce_only"] = true
+	}
 	err = b.SignedRequest(http.MethodPost, "open-api/order/create", params, &cResult)
 	if err != nil {
 		return
