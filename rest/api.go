@@ -277,6 +277,63 @@ func (b *ByBit) GetPositions() (result []Position, err error) {
 		err = errors.New(r.RetMsg)
 		return
 	}
+
+	for _, v := range r.Result {
+		result = append(result, b.convertPositionV1(v))
+	}
+	return
+}
+
+func (b *ByBit) convertPositionV1(position PositionV1) (result Position) {
+	result.ID = position.ID
+	result.UserID = position.UserID
+	result.RiskID = position.RiskID
+	result.Symbol = position.Symbol
+	result.Size = position.Size
+	result.Side = position.Side
+	result.EntryPrice = position.EntryPrice
+	result.LiqPrice = position.LiqPrice
+	result.BustPrice = position.BustPrice
+	result.TakeProfit = position.TakeProfit
+	result.StopLoss = position.StopLoss
+	result.TrailingStop = position.TrailingStop
+	result.PositionValue = position.PositionValue
+	result.Leverage = position.Leverage
+	result.PositionStatus = position.PositionStatus
+	result.AutoAddMargin = position.AutoAddMargin
+	result.OrderMargin = position.OrderMargin
+	result.PositionMargin = position.PositionMargin
+	result.OccClosingFee = position.OccClosingFee
+	result.OccFundingFee = position.OccFundingFee
+	result.ExtFields = position.ExtFields
+	result.WalletBalance = position.WalletBalance
+	result.CumRealisedPnl = position.CumRealisedPnl
+	result.CumCommission = position.CumCommission
+	result.RealisedPnl = position.RealisedPnl
+	result.DeleverageIndicator = position.DeleverageIndicator
+	result.OcCalcData = position.OcCalcData
+	result.CrossSeq = position.CrossSeq
+	result.PositionSeq = position.PositionSeq
+	result.CreatedAt = position.CreatedAt
+	result.UpdatedAt = position.UpdatedAt
+	result.UnrealisedPnl = position.UnrealisedPnl
+	return
+}
+
+// GetPosition 获取我的仓位
+func (b *ByBit) GetPosition(symbol string) (result Position, err error) {
+	var r GetPositionResult
+
+	params := map[string]interface{}{}
+	params["symbol"] = symbol
+	err = b.SignedRequest(http.MethodGet, "v2/private/position/list", params, &r)
+	if err != nil {
+		return
+	}
+	if r.RetCode != 0 {
+		err = errors.New(r.RetMsg)
+		return
+	}
 	result = r.Result
 	return
 }
@@ -336,7 +393,7 @@ func (b *ByBit) SignedRequest(method string, apiURL string, params map[string]in
 		log.Printf("%v", err)
 		return err
 	}
-	//log.Println(string(r.Body()))
+	log.Println(string(r.Body()))
 	err = json.Unmarshal(r.Body(), result)
 	return err
 }

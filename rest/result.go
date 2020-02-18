@@ -186,7 +186,7 @@ type LeverageItem struct {
 	Leverage int `json:"leverage"`
 }
 
-type Position struct {
+type PositionV1 struct {
 	ID                  int                `json:"id"`
 	UserID              int                `json:"user_id"`
 	RiskID              int                `json:"risk_id"`
@@ -221,12 +221,53 @@ type Position struct {
 	UnrealisedPnl       float64            `json:"unrealised_pnl"`
 }
 
+type Position struct {
+	ID                  int                `json:"id"`
+	UserID              int                `json:"user_id"`
+	RiskID              int                `json:"risk_id"`
+	Symbol              string             `json:"symbol"`
+	Size                float64            `json:"size"`
+	Side                string             `json:"side"`
+	EntryPrice          float64            `json:"entry_price,string"`
+	LiqPrice            float64            `json:"liq_price,string"`
+	BustPrice           float64            `json:"bust_price,string"`
+	TakeProfit          float64            `json:"take_profit,string"`
+	StopLoss            float64            `json:"stop_loss,string"`
+	TrailingStop        float64            `json:"trailing_stop,string"`
+	PositionValue       float64            `json:"position_value,string"`
+	Leverage            float64            `json:"leverage,string"`
+	PositionStatus      string             `json:"position_status"`
+	AutoAddMargin       float64            `json:"auto_add_margin"`
+	OrderMargin         float64            `json:"order_margin,string"`
+	PositionMargin      float64            `json:"position_margin,string"`
+	OccClosingFee       float64            `json:"occ_closing_fee,string"`
+	OccFundingFee       float64            `json:"occ_funding_fee,string"`
+	ExtFields           *PositionExtFields `json:"ext_fields"`
+	WalletBalance       float64            `json:"wallet_balance,string"`
+	CumRealisedPnl      float64            `json:"cum_realised_pnl,string"`
+	CumCommission       float64            `json:"cum_commission,string"`
+	RealisedPnl         float64            `json:"realised_pnl,string"`
+	DeleverageIndicator float64            `json:"deleverage_indicator"`
+	OcCalcData          string             `json:"oc_calc_data"`
+	CrossSeq            float64            `json:"cross_seq"`
+	PositionSeq         float64            `json:"position_seq"`
+	CreatedAt           time.Time          `json:"created_at"`
+	UpdatedAt           time.Time          `json:"updated_at"`
+	UnrealisedPnl       float64            `json:"unrealised_pnl"`
+}
+
 type PositionExtFields struct {
 	Remark string `json:"_remark"`
 }
 
 type PositionListResult struct {
 	BaseResult
+	ExtInfo interface{}  `json:"ext_info"`
+	Result  []PositionV1 `json:"result"`
+}
+
+type GetPositionResult struct {
+	BaseResult
 	ExtInfo interface{} `json:"ext_info"`
-	Result  []Position  `json:"result"`
+	Result  Position    `json:"result"`
 }
