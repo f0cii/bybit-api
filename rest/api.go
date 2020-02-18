@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -35,7 +36,31 @@ func (b *ByBit) GetOrderBook(symbol string) (result OrderBook, err error) {
 	if err != nil {
 		return
 	}
-	result = ret.Result
+	for _, v := range ret.Result {
+		if v.Side == "Sell" {
+			result.Asks = append(result.Asks, Item{
+				Price: v.Price,
+				Size:  v.Size,
+			})
+		} else if v.Side == "Buy" {
+			result.Bids = append(result.Bids, Item{
+				Price: v.Price,
+				Size:  v.Size,
+			})
+		}
+	}
+
+	sort.Slice(result.Asks, func(i, j int) bool {
+		return result.Asks[i].Price < result.Asks[j].Price
+	})
+
+	sort.Slice(result.Bids, func(i, j int) bool {
+		return result.Bids[i].Price > result.Bids[j].Price
+	})
+
+	var timeNow float64
+	timeNow, err = strconv.ParseFloat(ret.TimeNow, 64) // 1582011750.433202
+	result.Time = time.Unix(0, int64(timeNow*1e6))
 	return
 }
 
@@ -264,13 +289,13 @@ func (b *ByBit) PublicRequest(method string, apiURL string, params map[string]in
 	if param != "" {
 		fullURL += "?" + param
 	}
-	log.Println(fullURL)
+	//log.Println(fullURL)
 	r, err := b.client.R().Execute(method, fullURL)
 	if err != nil {
 		log.Printf("%v", err)
 		return err
 	}
-	log.Printf("%v", string(r.Body()))
+	//log.Printf("%v", string(r.Body()))
 	err = json.Unmarshal(r.Body(), result)
 	return err
 }
@@ -302,7 +327,7 @@ func (b *ByBit) SignedRequest(method string, apiURL string, params map[string]in
 		log.Printf("%v", err)
 		return err
 	}
-	log.Println(string(r.Body()))
+	//log.Println(string(r.Body()))
 	err = json.Unmarshal(r.Body(), result)
 	return err
 }

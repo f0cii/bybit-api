@@ -22,8 +22,11 @@ func TestByBit_GetOrderBook(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	for _, v := range ob {
-		t.Logf("%#v", v)
+	for _, v := range ob.Asks {
+		t.Logf("Ask: %#v", v)
+	}
+	for _, v := range ob.Bids {
+		t.Logf("Bid: %#v", v)
 	}
 }
 
