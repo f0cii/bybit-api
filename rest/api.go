@@ -26,6 +26,20 @@ func New(baseURL string, apiKey string, secretKey string) *ByBit {
 	return &ByBit{baseURL: baseURL, apiKey: apiKey, secretKey: secretKey, client: resty.New()}
 }
 
+// GetBalance Get Wallet Balance
+// coin: BTC,EOS,XRP,ETH,USDT
+func (b *ByBit) GetWalletBalance(coin string) (result GetBalanceResultData, err error) {
+	var ret GetBalanceResult
+	params := map[string]interface{}{}
+	params["coin"] = coin
+	err = b.SignedRequest(http.MethodGet, "v2/private/wallet/balance", params, &ret) // v2/private/wallet/balance
+	if err != nil {
+		return
+	}
+	result = ret.Result
+	return
+}
+
 // CreateOrder 创建委托单
 // symbol: 产品类型, 有效选项:BTCUSD,ETHUSD (BTCUSD ETHUSD)
 // side: 方向, 有效选项:Buy, Sell (Buy Sell)
@@ -50,27 +64,7 @@ func (b *ByBit) CreateOrder(side string, orderType string, price float64, qty in
 		err = errors.New(cResult.RetMsg)
 		return
 	}
-
-	o := &cResult.Result
-	result.OrderID = o.OrderID
-	result.UserID = o.UserID
-	result.Symbol = o.Symbol
-	result.Side = o.Side
-	result.OrderType = o.OrderType
-	result.Price = o.Price
-	result.Qty = o.Qty
-	result.TimeInForce = o.TimeInForce
-	result.OrderStatus = o.OrderStatus
-	result.LastExecTime = o.LastExecTime
-	result.LastExecPrice = o.LastExecPrice
-	result.LeavesQty = o.LeavesQty
-	result.CumExecQty = o.CumExecQty
-	result.CumExecValue = o.CumExecValue
-	result.CumExecFee = o.CumExecFee
-	result.RejectReason = o.RejectReason
-	result.OrderLinkID = o.OrderLinkID
-	result.CreatedAt = o.CreatedAt
-	result.UpdatedAt = o.UpdatedAt
+	result = cResult.Result
 	return
 }
 
@@ -130,30 +124,8 @@ func (b *ByBit) getOrders(orderID string, orderLinkID string, sort string, order
 		err = errors.New(cResult.RetMsg)
 		return
 	}
-	for _, o := range cResult.Result.Data {
-		var order Order
-		order.OrderID = o.OrderID
-		order.UserID = o.UserID
-		order.Symbol = o.Symbol
-		order.Side = o.Side
-		order.OrderType = o.OrderType
-		order.Price = o.Price
-		order.Qty = o.Qty
-		order.TimeInForce = o.TimeInForce
-		order.OrderStatus = o.OrderStatus
-		order.LastExecTime = o.LastExecTime
-		order.LastExecPrice = o.LastExecPrice
-		order.LeavesQty = o.LeavesQty
-		order.CumExecQty = o.CumExecQty
-		order.CumExecValue = o.CumExecValue
-		order.CumExecFee = o.CumExecFee
-		order.RejectReason = o.RejectReason
-		order.OrderLinkID = o.OrderLinkID
-		order.CreatedAt = o.CreatedAt
-		order.UpdatedAt = o.UpdatedAt
-		result = append(result, order)
-	}
 
+	result = cResult.Result.Data
 	return
 }
 
@@ -204,26 +176,7 @@ func (b *ByBit) CancelOrder(orderID string, symbol string) (result Order, err er
 		return
 	}
 
-	o := &cResult.Result
-	result.OrderID = o.OrderID
-	result.UserID = o.UserID
-	result.Symbol = o.Symbol
-	result.Side = o.Side
-	result.OrderType = o.OrderType
-	result.Price = o.Price
-	result.Qty = o.Qty
-	result.TimeInForce = o.TimeInForce
-	result.OrderStatus = o.OrderStatus
-	result.LastExecTime = o.LastExecTime
-	result.LastExecPrice = o.LastExecPrice
-	result.LeavesQty = o.LeavesQty
-	result.CumExecQty = o.CumExecQty
-	result.CumExecValue = o.CumExecValue
-	result.CumExecFee = o.CumExecFee
-	result.RejectReason = o.RejectReason
-	result.OrderLinkID = o.OrderLinkID
-	result.CreatedAt = o.CreatedAt
-	result.UpdatedAt = o.UpdatedAt
+	result = cResult.Result
 	return
 }
 
