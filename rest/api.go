@@ -28,7 +28,7 @@ func New(baseURL string, apiKey string, secretKey string) *ByBit {
 
 // GetBalance Get Wallet Balance
 // coin: BTC,EOS,XRP,ETH,USDT
-func (b *ByBit) GetWalletBalance(coin string) (result GetBalanceResultData, err error) {
+func (b *ByBit) GetWalletBalance(coin string) (result Balance, err error) {
 	var ret GetBalanceResult
 	params := map[string]interface{}{}
 	params["coin"] = coin
@@ -36,7 +36,18 @@ func (b *ByBit) GetWalletBalance(coin string) (result GetBalanceResultData, err 
 	if err != nil {
 		return
 	}
-	result = ret.Result
+	switch coin {
+	case "BTC":
+		result = ret.Result.BTC
+	case "ETH":
+		result = ret.Result.ETH
+	case "EOS":
+		result = ret.Result.EOS
+	case "XRP":
+		result = ret.Result.XRP
+	case "USDT":
+		result = ret.Result.USDT
+	}
 	return
 }
 
