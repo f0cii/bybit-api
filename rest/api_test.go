@@ -28,6 +28,7 @@ func TestByBit_GetOrderBook(t *testing.T) {
 	for _, v := range ob.Bids {
 		t.Logf("Bid: %#v", v)
 	}
+	t.Logf("%v", ob.Time)
 }
 
 func TestByBit_GetWalletBalance(t *testing.T) {

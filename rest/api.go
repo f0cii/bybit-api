@@ -36,6 +36,7 @@ func (b *ByBit) GetOrderBook(symbol string) (result OrderBook, err error) {
 	if err != nil {
 		return
 	}
+
 	for _, v := range ret.Result {
 		if v.Side == "Sell" {
 			result.Asks = append(result.Asks, Item{
@@ -60,7 +61,10 @@ func (b *ByBit) GetOrderBook(symbol string) (result OrderBook, err error) {
 
 	var timeNow float64
 	timeNow, err = strconv.ParseFloat(ret.TimeNow, 64) // 1582011750.433202
-	result.Time = time.Unix(0, int64(timeNow*1e6))
+	if err != nil {
+		return
+	}
+	result.Time = time.Unix(0, int64(timeNow*1e9))
 	return
 }
 
