@@ -26,6 +26,19 @@ func New(baseURL string, apiKey string, secretKey string) *ByBit {
 	return &ByBit{baseURL: baseURL, apiKey: apiKey, secretKey: secretKey, client: resty.New()}
 }
 
+// GetOrderBook Get the orderbook
+func (b *ByBit) GetOrderBook(symbol string) (result OrderBook, err error) {
+	var ret GetOrderBookResult
+	params := map[string]interface{}{}
+	params["symbol"] = symbol
+	err = b.PublicRequest(http.MethodGet, "v2/public/orderBook/L2", params, &ret)
+	if err != nil {
+		return
+	}
+	result = ret.Result
+	return
+}
+
 // GetBalance Get Wallet Balance
 // coin: BTC,EOS,XRP,ETH,USDT
 func (b *ByBit) GetWalletBalance(coin string) (result Balance, err error) {
@@ -234,15 +247,32 @@ func (b *ByBit) GetPositions() (result []Position, err error) {
 	return
 }
 
-func (b *ByBit) PublicRequest(method string, apiURL string) {
+func (b *ByBit) PublicRequest(method string, apiURL string, params map[string]interface{}, result interface{}) error {
+	var keys []string
+	for k := range params {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	var p []string
+	for _, k := range keys {
+		p = append(p, fmt.Sprintf("%v=%v", k, params[k]))
+	}
+
+	param := strings.Join(p, "&")
 	fullURL := b.baseURL + apiURL
+	if param != "" {
+		fullURL += "?" + param
+	}
 	log.Println(fullURL)
-	resp, err := b.client.R().Execute(method, fullURL)
+	r, err := b.client.R().Execute(method, fullURL)
 	if err != nil {
 		log.Printf("%v", err)
-		return
+		return err
 	}
-	log.Printf("%v", string(resp.Body()))
+	log.Printf("%v", string(r.Body()))
+	err = json.Unmarshal(r.Body(), result)
+	return err
 }
 
 func (b *ByBit) SignedRequest(method string, apiURL string, params map[string]interface{}, result interface{}) error {

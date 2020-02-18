@@ -15,6 +15,18 @@ func newByBit() *ByBit {
 	return b
 }
 
+func TestByBit_GetOrderBook(t *testing.T) {
+	b := newByBit()
+	ob, err := b.GetOrderBook("BTCUSD")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	for _, v := range ob {
+		t.Logf("%#v", v)
+	}
+}
+
 func TestByBit_GetWalletBalance(t *testing.T) {
 	b := newByBit()
 	balance, err := b.GetWalletBalance("BTC")

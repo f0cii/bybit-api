@@ -15,6 +15,24 @@ type BaseResult struct {
 	RateLimitStatus int         `json:"rate_limit_status"`
 }
 
+type Item struct {
+	Symbol string  `json:"symbol"`
+	Price  float64 `json:"price,string"`
+	Size   float64 `json:"size"`
+	Side   string  `json:"side"` // Buy/Sell
+}
+
+type OrderBook []Item
+
+type GetOrderBookResult struct {
+	RetCode int       `json:"ret_code"`
+	RetMsg  string    `json:"ret_msg"`
+	ExtCode string    `json:"ext_code"`
+	ExtInfo string    `json:"ext_info"`
+	Result  OrderBook `json:"result"`
+	TimeNow string    `json:"time_now"`
+}
+
 type Balance struct {
 	Equity           float64 `json:"equity"`
 	AvailableBalance float64 `json:"available_balance"`
