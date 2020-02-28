@@ -126,6 +126,49 @@ func (b *ByBit) CreateOrder(side string, orderType string, price float64, qty in
 	return
 }
 
+// CreateStopOrder 创建条件委托单
+// https://github.com/bybit-exchange/bybit-official-api-docs/blob/master/zh_cn/rest_api.md#open-apistop-ordercreatepost
+// symbol: 产品类型, 有效选项:BTCUSD,ETHUSD (BTCUSD ETHUSD)
+// side: 方向, 有效选项:Buy, Sell (Buy Sell)
+// orderType: Limit/Market
+// price: 委托价格, 在没有仓位时，做多的委托价格需高于市价的10%、低于1百万。如有仓位时则需优于强平价。单笔价格增减最小单位为0.5。
+// qty: 委托数量, 单笔最大1百万
+// basePrice: 当前市价。用于和stop_px值进行比较，确定当前条件委托是看空到stop_px时触发还是看多到stop_px触发。主要是用来标识当前条件单预期的方向
+// stopPx: 条件委托下单时市价
+// triggerBy: 触发价格类型. 默认为上一笔成交价格
+// timeInForce: 执行策略, 有效选项:GoodTillCancel,ImmediateOrCancel,FillOrKill,PostOnly
+// reduceOnly: 只减仓
+// symbol: 产品类型, 有效选项:BTCUSD,ETHUSD (BTCUSD ETHUSD)
+func (b *ByBit) CreateStopOrder(side string, orderType string, price float64, basePrice float64, stopPx float64,
+	qty int, triggerBy string, timeInForce string, reduceOnly bool, symbol string) (result Order, err error) {
+	var cResult CreateOrderResult
+	params := map[string]interface{}{}
+	params["side"] = side
+	params["symbol"] = symbol
+	params["order_type"] = orderType
+	params["qty"] = qty
+	params["price"] = price
+	params["base_price"] = basePrice
+	params["stop_px"] = stopPx
+	params["time_in_force"] = timeInForce
+	if reduceOnly {
+		params["reduce_only"] = true
+	}
+	if triggerBy != "" {
+		params["trigger_by"] = triggerBy
+	}
+	err = b.SignedRequest(http.MethodPost, "open-api/stop-order/create", params, &cResult)
+	if err != nil {
+		return
+	}
+	if cResult.RetCode != 0 {
+		err = errors.New(cResult.RetMsg)
+		return
+	}
+	result = cResult.Result
+	return
+}
+
 // GetOrders 查询活动委托
 // symbol
 // orderID: 订单ID
