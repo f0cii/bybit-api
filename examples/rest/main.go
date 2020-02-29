@@ -26,7 +26,8 @@ func main() {
 	qty := 30
 	price := 7000.0
 	timeInForce := "GoodTillCancel"
-	order, err := b.CreateOrder(side, orderType, price, qty, timeInForce, symbol)
+	reduceOnly := false
+	order, err := b.CreateOrder(side, orderType, price, qty, timeInForce, reduceOnly, symbol)
 	if err != nil {
 		log.Println(err)
 		return
