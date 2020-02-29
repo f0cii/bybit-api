@@ -230,6 +230,50 @@ func (b *ByBit) getOrders(orderID string, orderLinkID string, sort string, order
 	return
 }
 
+// GetStopOrders 查询条件委托单
+// orderID: 条件委托单ID
+// orderLinkID: 机构自定义订单ID
+// order: 排序字段为created_at,升序降序，默认降序 (desc asc )
+// page: 页码，默认取第一页数据
+// stopOrderStatus 条件单状态: Untriggered: 等待市价触发条件单; Triggered: 市价已触发条件单; Cancelled: 取消; Active: 条件单触发成功且下单成功; Rejected: 条件触发成功但下单失败
+// limit: 一页数量，默认一页展示20条数据;最大支持50条每页
+func (b *ByBit) GetStopOrders(orderID string, orderLinkID string, stopOrderStatus string, order string,
+	page int, limit int, symbol string) (result []Order, err error) {
+	var cResult OrderListResult
+
+	if limit == 0 {
+		limit = 20
+	}
+
+	params := map[string]interface{}{}
+	params["symbol"] = symbol
+	if orderID != "" {
+		params["stop_order_id"] = orderID
+	}
+	if orderLinkID != "" {
+		params["order_link_id"] = orderLinkID
+	}
+	if stopOrderStatus != "" {
+		params["stop_order_status"] = stopOrderStatus
+	}
+	if order != "" {
+		params["order"] = order
+	}
+	params["page"] = page
+	params["limit"] = limit
+	err = b.SignedRequest(http.MethodGet, "open-api/stop-order/list", params, &cResult)
+	if err != nil {
+		return
+	}
+	if cResult.RetCode != 0 {
+		err = errors.New(cResult.RetMsg)
+		return
+	}
+
+	result = cResult.Result.Data
+	return
+}
+
 // GetOrderByID
 func (b *ByBit) GetOrderByID(orderID string, symbol string) (result Order, err error) {
 	var orders []Order
@@ -269,6 +313,27 @@ func (b *ByBit) CancelOrder(orderID string, symbol string) (result Order, err er
 	params["symbol"] = symbol
 	params["order_id"] = orderID
 	err = b.SignedRequest(http.MethodPost, "open-api/order/cancel", params, &cResult)
+	if err != nil {
+		return
+	}
+	if cResult.RetCode != 0 {
+		err = errors.New(cResult.RetMsg)
+		return
+	}
+
+	result = cResult.Result
+	return
+}
+
+// CancelStopOrder 撤销活动条件委托单
+// orderID: 活动条件委托单ID, 数据来自创建活动委托单返回的订单唯一ID
+// symbol:
+func (b *ByBit) CancelStopOrder(orderID string, symbol string) (result Order, err error) {
+	var cResult CancelOrderResult
+	params := map[string]interface{}{}
+	params["symbol"] = symbol
+	params["stop_order_id"] = orderID
+	err = b.SignedRequest(http.MethodPost, "open-api/stop-order/cancel", params, &cResult)
 	if err != nil {
 		return
 	}

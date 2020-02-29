@@ -94,11 +94,35 @@ func TestByBit_GetOrders(t *testing.T) {
 	}
 }
 
+func TestByBit_GetStopOrders(t *testing.T) {
+	b := newByBit()
+	symbol := "BTCUSD"
+	orders, err := b.GetStopOrders("", "", "", "", 0, 10, symbol)
+	assert.Nil(t, err)
+	//t.Logf("%#v", orders)
+	for _, order := range orders {
+		if order.ExtFields != nil {
+			t.Logf("%#v %v", order, *order.ExtFields)
+		} else {
+			t.Logf("%#v", order)
+		}
+	}
+}
+
 func TestByBit_CancelOrder(t *testing.T) {
 	b := newByBit()
 	orderID := "c5b96b82-6a79-4b15-a797-361fe2ca0260"
 	symbol := "BTCUSD"
 	order, err := b.CancelOrder(orderID, symbol)
+	assert.Nil(t, err)
+	t.Logf("%#v", order)
+}
+
+func TestByBit_CancelStopOrder(t *testing.T) {
+	b := newByBit()
+	orderID := "c6e535a9-6900-4b64-b983-3b220f6f41f8"
+	symbol := "BTCUSD"
+	order, err := b.CancelStopOrder(orderID, symbol)
 	assert.Nil(t, err)
 	t.Logf("%#v", order)
 }
