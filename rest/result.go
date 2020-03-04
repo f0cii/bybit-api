@@ -42,6 +42,119 @@ type GetOrderBookResult struct {
 	TimeNow string    `json:"time_now"`
 }
 
+type OHLC struct {
+	Symbol   string  `json:"symbol"`
+	Interval string  `json:"interval"`
+	OpenTime int64   `json:"open_time"`
+	Open     float64 `json:"open,string"`
+	High     float64 `json:"high,string"`
+	Low      float64 `json:"low,string"`
+	Close    float64 `json:"close,string"`
+	Volume   float64 `json:"volume,string"`
+	Turnover float64 `json:"turnover,string"`
+}
+
+type GetKlineResult struct {
+	RetCode int    `json:"ret_code"`
+	RetMsg  string `json:"ret_msg"`
+	ExtCode string `json:"ext_code"`
+	ExtInfo string `json:"ext_info"`
+	Result  []OHLC `json:"result"`
+	TimeNow string `json:"time_now"`
+}
+
+type Ticker struct {
+	Symbol               string    `json:"symbol"`
+	BidPrice             float64   `json:"bid_price,string"`
+	AskPrice             float64   `json:"ask_price,string"`
+	LastPrice            float64   `json:"last_price,string"`
+	LastTickDirection    string    `json:"last_tick_direction"`
+	PrevPrice24H         float64   `json:"prev_price_24h,string"`
+	Price24HPcnt         float64   `json:"price_24h_pcnt,string"`
+	HighPrice24H         float64   `json:"high_price_24h,string"`
+	LowPrice24H          float64   `json:"low_price_24h,string"`
+	PrevPrice1H          float64   `json:"prev_price_1h,string"`
+	Price1HPcnt          float64   `json:"price_1h_pcnt,string"`
+	MarkPrice            float64   `json:"mark_price,string"`
+	IndexPrice           float64   `json:"index_price,string"`
+	OpenInterest         int       `json:"open_interest"`
+	OpenValue            float64   `json:"open_value,string"`
+	TotalTurnover        float64   `json:"total_turnover,string"`
+	Turnover24H          float64   `json:"turnover_24h,string"`
+	TotalVolume          int64     `json:"total_volume"`
+	Volume24H            int64     `json:"volume_24h"`
+	FundingRate          float64   `json:"funding_rate,string"`
+	PredictedFundingRate float64   `json:"predicted_funding_rate,string"`
+	NextFundingTime      time.Time `json:"next_funding_time"`
+	CountdownHour        int       `json:"countdown_hour"`
+}
+
+type GetTickersResult struct {
+	RetCode int      `json:"ret_code"`
+	RetMsg  string   `json:"ret_msg"`
+	ExtCode string   `json:"ext_code"`
+	ExtInfo string   `json:"ext_info"`
+	Result  []Ticker `json:"result"`
+	TimeNow string   `json:"time_now"`
+}
+
+type TradingRecord struct {
+	ID     int       `json:"id"`
+	Symbol string    `json:"symbol"`
+	Price  float64   `json:"price"`
+	Qty    int       `json:"qty"`
+	Side   string    `json:"side"`
+	Time   time.Time `json:"time"`
+}
+
+type GetTradingRecordsResult struct {
+	RetCode int             `json:"ret_code"`
+	RetMsg  string          `json:"ret_msg"`
+	ExtCode string          `json:"ext_code"`
+	ExtInfo string          `json:"ext_info"`
+	Result  []TradingRecord `json:"result"`
+	TimeNow string          `json:"time_now"`
+}
+
+type LeverageFilter struct {
+	MinLeverage  int     `json:"min_leverage"`
+	MaxLeverage  int     `json:"max_leverage"`
+	LeverageStep float64 `json:"leverage_step,string"`
+}
+
+type PriceFilter struct {
+	MinPrice float64 `json:"min_price,string"`
+	MaxPrice float64 `json:"max_price,string"`
+	TickSize float64 `json:"tick_size,string"`
+}
+
+type LotSizeFilter struct {
+	MaxTradingQty int `json:"max_trading_qty"`
+	MinTradingQty int `json:"min_trading_qty"`
+	QtyStep       int `json:"qty_step"`
+}
+
+type SymbolInfo struct {
+	Name           string         `json:"name"`
+	BaseCurrency   string         `json:"base_currency"`
+	QuoteCurrency  string         `json:"quote_currency"`
+	PriceScale     int            `json:"price_scale"`
+	TakerFee       float64        `json:"taker_fee,string"`
+	MakerFee       float64        `json:"maker_fee,string"`
+	LeverageFilter LeverageFilter `json:"leverage_filter"`
+	PriceFilter    PriceFilter    `json:"price_filter"`
+	LotSizeFilter  LotSizeFilter  `json:"lot_size_filter"`
+}
+
+type GetSymbolsResult struct {
+	RetCode int          `json:"ret_code"`
+	RetMsg  string       `json:"ret_msg"`
+	ExtCode string       `json:"ext_code"`
+	ExtInfo string       `json:"ext_info"`
+	Result  []SymbolInfo `json:"result"`
+	TimeNow string       `json:"time_now"`
+}
+
 type Balance struct {
 	Equity           float64 `json:"equity"`
 	AvailableBalance float64 `json:"available_balance"`
@@ -274,3 +387,73 @@ type GetPositionResult struct {
 	ExtInfo interface{} `json:"ext_info"`
 	Result  Position    `json:"result"`
 }
+
+type OrderV2 struct {
+	UserID        int       `json:"user_id"`
+	OrderID       string    `json:"order_id"`
+	Symbol        string    `json:"symbol"`
+	Side          string    `json:"side"`
+	OrderType     string    `json:"order_type"`
+	Price         float64   `json:"price"`
+	Qty           float64   `json:"qty"`
+	TimeInForce   string    `json:"time_in_force"`
+	OrderStatus   string    `json:"order_status"`
+	LastExecTime  int       `json:"last_exec_time"`
+	LastExecPrice float64   `json:"last_exec_price"`
+	LeavesQty     int       `json:"leaves_qty"`
+	CumExecQty    int       `json:"cum_exec_qty"`
+	CumExecValue  float64   `json:"cum_exec_value"`
+	CumExecFee    float64   `json:"cum_exec_fee"`
+	RejectReason  string    `json:"reject_reason"`
+	OrderLinkID   string    `json:"order_link_id"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+}
+
+type CreateOrderV2Result struct {
+	RetCode          int     `json:"ret_code"`
+	RetMsg           string  `json:"ret_msg"`
+	ExtCode          string  `json:"ext_code"`
+	ExtInfo          string  `json:"ext_info"`
+	Result           OrderV2 `json:"result"`
+	TimeNow          string  `json:"time_now"`
+	RateLimitStatus  int     `json:"rate_limit_status"`
+	RateLimitResetMs int64   `json:"rate_limit_reset_ms"`
+	RateLimit        int     `json:"rate_limit"`
+}
+
+type CancelOrderV2Result struct {
+	RetCode          int     `json:"ret_code"`
+	RetMsg           string  `json:"ret_msg"`
+	ExtCode          string  `json:"ext_code"`
+	ExtInfo          string  `json:"ext_info"`
+	Result           OrderV2 `json:"result"`
+	TimeNow          string  `json:"time_now"`
+	RateLimitStatus  int     `json:"rate_limit_status"`
+	RateLimitResetMs int64   `json:"rate_limit_reset_ms"`
+	RateLimit        int     `json:"rate_limit"`
+}
+
+/*
+struct {
+		UserID        int       `json:"user_id"`
+		OrderID       string    `json:"order_id"`
+		Symbol        string    `json:"symbol"`
+		Side          string    `json:"side"`
+		OrderType     string    `json:"order_type"`
+		Price         int       `json:"price"`
+		Qty           int       `json:"qty"`
+		TimeInForce   string    `json:"time_in_force"`
+		OrderStatus   string    `json:"order_status"`
+		LastExecTime  int       `json:"last_exec_time"`
+		LastExecPrice int       `json:"last_exec_price"`
+		LeavesQty     int       `json:"leaves_qty"`
+		CumExecQty    int       `json:"cum_exec_qty"`
+		CumExecValue  int       `json:"cum_exec_value"`
+		CumExecFee    int       `json:"cum_exec_fee"`
+		RejectReason  string    `json:"reject_reason"`
+		OrderLinkID   string    `json:"order_link_id"`
+		CreatedAt     time.Time `json:"created_at"`
+		UpdatedAt     time.Time `json:"updated_at"`
+	}
+*/
