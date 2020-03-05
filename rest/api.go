@@ -201,7 +201,6 @@ func (b *ByBit) SignedRequest(method string, apiURL string, params map[string]in
 	param += "&sign=" + signature
 
 	fullURL := b.baseURL + apiURL + "?" + param
-	log.Printf("fullURL: %v", fullURL)
 	r, err := b.client.R().Execute(method, fullURL)
 	if err != nil {
 		log.Printf("%v", err)
