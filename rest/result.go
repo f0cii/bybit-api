@@ -200,6 +200,19 @@ type CreateOrderResult struct {
 	RateLimitStatus int    `json:"rate_limit_status"`
 }
 
+type OrderLite struct {
+	OrderID string `json:"order_id"`
+}
+
+type ReplaceOrderResult struct {
+	RetCode         int       `json:"ret_code"`
+	RetMsg          string    `json:"ret_msg"`
+	ExtCode         string    `json:"ext_code"`
+	Result          OrderLite `json:"result"`
+	TimeNow         string    `json:"time_now"`
+	RateLimitStatus int       `json:"rate_limit_status"`
+}
+
 type CancelOrderResult struct {
 	RetCode         int    `json:"ret_code"`
 	RetMsg          string `json:"ret_msg"`
@@ -389,25 +402,25 @@ type GetPositionResult struct {
 }
 
 type OrderV2 struct {
-	UserID        int       `json:"user_id"`
-	OrderID       string    `json:"order_id"`
-	Symbol        string    `json:"symbol"`
-	Side          string    `json:"side"`
-	OrderType     string    `json:"order_type"`
-	Price         float64   `json:"price"`
-	Qty           float64   `json:"qty"`
-	TimeInForce   string    `json:"time_in_force"`
-	OrderStatus   string    `json:"order_status"`
-	LastExecTime  int       `json:"last_exec_time"`
-	LastExecPrice float64   `json:"last_exec_price"`
-	LeavesQty     int       `json:"leaves_qty"`
-	CumExecQty    int       `json:"cum_exec_qty"`
-	CumExecValue  float64   `json:"cum_exec_value"`
-	CumExecFee    float64   `json:"cum_exec_fee"`
-	RejectReason  string    `json:"reject_reason"`
-	OrderLinkID   string    `json:"order_link_id"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	UserID        int         `json:"user_id"`
+	OrderID       string      `json:"order_id"`
+	Symbol        string      `json:"symbol"`
+	Side          string      `json:"side"`
+	OrderType     string      `json:"order_type"`
+	Price         json.Number `json:"price"`
+	Qty           float64     `json:"qty"`
+	TimeInForce   string      `json:"time_in_force"`
+	OrderStatus   string      `json:"order_status"`
+	LastExecTime  int         `json:"last_exec_time"`
+	LastExecPrice float64     `json:"last_exec_price"`
+	LeavesQty     int         `json:"leaves_qty"`
+	CumExecQty    int         `json:"cum_exec_qty"`
+	CumExecValue  float64     `json:"cum_exec_value"`
+	CumExecFee    float64     `json:"cum_exec_fee"`
+	RejectReason  string      `json:"reject_reason"`
+	OrderLinkID   string      `json:"order_link_id"`
+	CreatedAt     time.Time   `json:"created_at"`
+	UpdatedAt     time.Time   `json:"updated_at"`
 }
 
 type CreateOrderV2Result struct {
@@ -434,26 +447,14 @@ type CancelOrderV2Result struct {
 	RateLimit        int     `json:"rate_limit"`
 }
 
-/*
-struct {
-		UserID        int       `json:"user_id"`
-		OrderID       string    `json:"order_id"`
-		Symbol        string    `json:"symbol"`
-		Side          string    `json:"side"`
-		OrderType     string    `json:"order_type"`
-		Price         int       `json:"price"`
-		Qty           int       `json:"qty"`
-		TimeInForce   string    `json:"time_in_force"`
-		OrderStatus   string    `json:"order_status"`
-		LastExecTime  int       `json:"last_exec_time"`
-		LastExecPrice int       `json:"last_exec_price"`
-		LeavesQty     int       `json:"leaves_qty"`
-		CumExecQty    int       `json:"cum_exec_qty"`
-		CumExecValue  int       `json:"cum_exec_value"`
-		CumExecFee    int       `json:"cum_exec_fee"`
-		RejectReason  string    `json:"reject_reason"`
-		OrderLinkID   string    `json:"order_link_id"`
-		CreatedAt     time.Time `json:"created_at"`
-		UpdatedAt     time.Time `json:"updated_at"`
-	}
-*/
+type CancelAllOrderV2Result struct {
+	RetCode          int       `json:"ret_code"`
+	RetMsg           string    `json:"ret_msg"`
+	ExtCode          string    `json:"ext_code"`
+	ExtInfo          string    `json:"ext_info"`
+	Result           []OrderV2 `json:"result"`
+	TimeNow          string    `json:"time_now"`
+	RateLimitStatus  int       `json:"rate_limit_status"`
+	RateLimitResetMs int64     `json:"rate_limit_reset_ms"`
+	RateLimit        int       `json:"rate_limit"`
+}

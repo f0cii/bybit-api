@@ -78,6 +78,29 @@ func (b *ByBit) CreateOrder(side string, orderType string, price float64, qty in
 	return
 }
 
+func (b *ByBit) ReplaceOrder(symbol string, orderID string, qty int, price float64) (result Order, err error) {
+	var cResult ReplaceOrderResult
+	params := map[string]interface{}{}
+	params["order_id"] = orderID
+	params["symbol"] = symbol
+	if qty > 0 {
+		params["p_r_qty"] = qty
+	}
+	if price > 0 {
+		params["p_r_price"] = price
+	}
+	err = b.SignedRequest(http.MethodPost, "open-api/order/replace", params, &cResult)
+	if err != nil {
+		return
+	}
+	if cResult.RetCode != 0 {
+		err = errors.New(cResult.RetMsg)
+		return
+	}
+	result.OrderID = cResult.Result.OrderID
+	return
+}
+
 // CreateStopOrder 创建条件委托单
 // https://github.com/bybit-exchange/bybit-official-api-docs/blob/master/zh_cn/rest_api.md#open-apistop-ordercreatepost
 // symbol: 产品类型, 有效选项:BTCUSD,ETHUSD (BTCUSD ETHUSD)
@@ -291,6 +314,24 @@ func (b *ByBit) CancelOrderV2(orderID string, orderLinkID string, symbol string)
 		params["order_link_id"] = orderLinkID
 	}
 	err = b.SignedRequest(http.MethodPost, "v2/private/order/cancel", params, &cResult)
+	if err != nil {
+		return
+	}
+	if cResult.RetCode != 0 {
+		err = errors.New(cResult.RetMsg)
+		return
+	}
+
+	result = cResult.Result
+	return
+}
+
+// CancelAllOrder Cancel All Active Orders
+func (b *ByBit) CancelAllOrder(symbol string) (result []OrderV2, err error) {
+	var cResult CancelAllOrderV2Result
+	params := map[string]interface{}{}
+	params["symbol"] = symbol
+	err = b.SignedRequest(http.MethodPost, "v2/private/order/cancelAll", params, &cResult)
 	if err != nil {
 		return
 	}
