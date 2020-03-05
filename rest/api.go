@@ -174,13 +174,13 @@ func (b *ByBit) PublicRequest(method string, apiURL string, params map[string]in
 		log.Printf("%v", err)
 		return err
 	}
-	log.Printf("%v", string(r.Body()))
+	//log.Printf("%v", string(r.Body()))
 	err = json.Unmarshal(r.Body(), result)
 	return err
 }
 
 func (b *ByBit) SignedRequest(method string, apiURL string, params map[string]interface{}, result interface{}) error {
-	timestamp := time.Now().Unix()*1000 + 1000
+	timestamp := time.Now().UnixNano() / 1e6
 
 	params["api_key"] = b.apiKey
 	params["timestamp"] = timestamp
@@ -201,12 +201,13 @@ func (b *ByBit) SignedRequest(method string, apiURL string, params map[string]in
 	param += "&sign=" + signature
 
 	fullURL := b.baseURL + apiURL + "?" + param
+	log.Printf("fullURL: %v", fullURL)
 	r, err := b.client.R().Execute(method, fullURL)
 	if err != nil {
 		log.Printf("%v", err)
 		return err
 	}
-	log.Println(string(r.Body()))
+	//log.Println(string(r.Body()))
 	err = json.Unmarshal(r.Body(), result)
 	return err
 }
