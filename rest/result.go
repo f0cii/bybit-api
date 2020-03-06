@@ -458,3 +458,15 @@ type CancelAllOrderV2Result struct {
 	RateLimitResetMs int64     `json:"rate_limit_reset_ms"`
 	RateLimit        int       `json:"rate_limit"`
 }
+
+type QueryOrderResult struct {
+	RetCode          int     `json:"ret_code"`
+	RetMsg           string  `json:"ret_msg"`
+	ExtCode          string  `json:"ext_code"`
+	ExtInfo          string  `json:"ext_info"`
+	Result           OrderV2 `json:"result"`
+	TimeNow          string  `json:"time_now"`
+	RateLimitStatus  int     `json:"rate_limit_status"`
+	RateLimitResetMs int64   `json:"rate_limit_reset_ms"`
+	RateLimit        int     `json:"rate_limit"`
+}

@@ -250,17 +250,27 @@ func (b *ByBit) GetStopOrders(orderID string, orderLinkID string, stopOrderStatu
 }
 
 // GetOrderByID
-func (b *ByBit) GetOrderByID(orderID string, symbol string) (result Order, err error) {
-	var orders []Order
-	orders, err = b.getOrders(orderID, "", "", "", 0, 20, "", symbol)
+func (b *ByBit) GetOrderByID(orderID string, orderLinkID string, symbol string) (result OrderV2, err error) {
+	var cResult QueryOrderResult
+
+	params := map[string]interface{}{}
+	params["symbol"] = symbol
+	if orderID != "" {
+		params["order_id"] = orderID
+	}
+	if orderLinkID != "" {
+		params["order_link_id"] = orderLinkID
+	}
+	err = b.SignedRequest(http.MethodGet, "v2/private/order", params, &cResult)
 	if err != nil {
 		return
 	}
-	if len(orders) != 1 {
-		err = errors.New("not found")
+	if cResult.RetCode != 0 {
+		err = errors.New(cResult.RetMsg)
 		return
 	}
-	result = orders[0]
+
+	result = cResult.Result
 	return
 }
 

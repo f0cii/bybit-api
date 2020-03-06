@@ -12,7 +12,9 @@ import (
 func newByBit() *ByBit {
 	//baseURL := "https://api.bybit.com/"
 	baseURL := "https://api-testnet.bybit.com/"
-	b := New(baseURL, "6IASD6KDBdunn5qLpT", "nXjZMUiB3aMiPaQ9EUKYFloYNd0zM39RjRWF")
+	apiKey := "6IASD6KDBdunn5qLpT"
+	secretKey := "nXjZMUiB3aMiPaQ9EUKYFloYNd0zM39RjRWF"
+	b := New(baseURL, apiKey, secretKey)
 	return b
 }
 
@@ -166,7 +168,7 @@ func TestByBit_CreateStopOrder(t *testing.T) {
 func TestByBit_GetOrders(t *testing.T) {
 	b := newByBit()
 	symbol := "BTCUSD"
-	orders, err := b.GetOrders("", "", 0, 20, "", symbol)
+	orders, err := b.GetOrders("", "", 1, 20, "", symbol)
 	assert.Nil(t, err)
 	//t.Logf("%#v", orders)
 	for _, order := range orders {
@@ -176,6 +178,20 @@ func TestByBit_GetOrders(t *testing.T) {
 			t.Logf("%#v", order)
 		}
 	}
+}
+
+func TestByBit_GetOrder(t *testing.T) {
+	b := newByBit()
+	order, err := b.GetOrderByID(
+		"6d3c70d5-529f-4716-9b20-a3c7dc5b6fd5",
+		"",
+		"BTCUSD",
+	)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Logf("%#v", order)
 }
 
 func TestByBit_GetStopOrders(t *testing.T) {

@@ -206,7 +206,7 @@ func (b *ByBit) SignedRequest(method string, apiURL string, params map[string]in
 		log.Printf("%v", err)
 		return err
 	}
-	//log.Println(string(r.Body()))
+	log.Println(string(r.Body()))
 	err = json.Unmarshal(r.Body(), result)
 	return err
 }
