@@ -411,7 +411,7 @@ type OrderV2 struct {
 	Qty           float64     `json:"qty"`
 	TimeInForce   string      `json:"time_in_force"`
 	OrderStatus   string      `json:"order_status"`
-	LastExecTime  int         `json:"last_exec_time"`
+	LastExecTime  float64     `json:"last_exec_time"`
 	LastExecPrice float64     `json:"last_exec_price"`
 	LeavesQty     int         `json:"leaves_qty"`
 	CumExecQty    int         `json:"cum_exec_qty"`
