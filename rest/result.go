@@ -412,11 +412,11 @@ type OrderV2 struct {
 	TimeInForce   string      `json:"time_in_force"`
 	OrderStatus   string      `json:"order_status"`
 	LastExecTime  json.Number `json:"last_exec_time"`
-	LastExecPrice float64     `json:"last_exec_price"`
+	LastExecPrice json.Number `json:"last_exec_price"`
 	LeavesQty     int         `json:"leaves_qty"`
 	CumExecQty    int         `json:"cum_exec_qty"`
-	CumExecValue  float64     `json:"cum_exec_value"`
-	CumExecFee    float64     `json:"cum_exec_fee"`
+	CumExecValue  json.Number `json:"cum_exec_value"`
+	CumExecFee    json.Number `json:"cum_exec_fee"`
 	RejectReason  string      `json:"reject_reason"`
 	OrderLinkID   string      `json:"order_link_id"`
 	CreatedAt     time.Time   `json:"created_at"`

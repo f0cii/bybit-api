@@ -1,6 +1,8 @@
 # bybit-api
 Go library for using the ByBit's Rest &amp; Websocket API
 
+[API Doc](https://bybit-exchange.github.io/docs/inverse/#t-introduction)
+
 ### Example
 
 ### Rest api
