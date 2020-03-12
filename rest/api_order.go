@@ -2,6 +2,7 @@ package rest
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 )
 
@@ -33,12 +34,13 @@ func (b *ByBit) CreateOrderV2(side string, orderType string, price float64,
 	if orderLinkID != "" {
 		params["order_link_id"] = orderLinkID
 	}
-	err = b.SignedRequest(http.MethodPost, "v2/private/order/create", params, &cResult)
+	var resp []byte
+	resp, err = b.SignedRequest(http.MethodPost, "v2/private/order/create", params, &cResult)
 	if err != nil {
 		return
 	}
 	if cResult.RetCode != 0 {
-		err = errors.New(cResult.RetMsg)
+		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
 	result = cResult.Result
@@ -66,12 +68,13 @@ func (b *ByBit) CreateOrder(side string, orderType string, price float64, qty in
 	if reduceOnly {
 		params["reduce_only"] = true
 	}
-	err = b.SignedRequest(http.MethodPost, "open-api/order/create", params, &cResult)
+	var resp []byte
+	resp, err = b.SignedRequest(http.MethodPost, "open-api/order/create", params, &cResult)
 	if err != nil {
 		return
 	}
 	if cResult.RetCode != 0 {
-		err = errors.New(cResult.RetMsg)
+		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
 	result = cResult.Result
@@ -89,12 +92,13 @@ func (b *ByBit) ReplaceOrder(symbol string, orderID string, qty int, price float
 	if price > 0 {
 		params["p_r_price"] = price
 	}
-	err = b.SignedRequest(http.MethodPost, "open-api/order/replace", params, &cResult)
+	var resp []byte
+	resp, err = b.SignedRequest(http.MethodPost, "open-api/order/replace", params, &cResult)
 	if err != nil {
 		return
 	}
 	if cResult.RetCode != 0 {
-		err = errors.New(cResult.RetMsg)
+		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
 	result.OrderID = cResult.Result.OrderID
@@ -132,12 +136,13 @@ func (b *ByBit) CreateStopOrder(side string, orderType string, price float64, ba
 	if triggerBy != "" {
 		params["trigger_by"] = triggerBy
 	}
-	err = b.SignedRequest(http.MethodPost, "open-api/stop-order/create", params, &cResult)
+	var resp []byte
+	resp, err = b.SignedRequest(http.MethodPost, "open-api/stop-order/create", params, &cResult)
 	if err != nil {
 		return
 	}
 	if cResult.RetCode != 0 {
-		err = errors.New(cResult.RetMsg)
+		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
 	result = cResult.Result
@@ -192,12 +197,13 @@ func (b *ByBit) getOrders(orderID string, orderLinkID string, sort string, order
 	if orderStatus != "" {
 		params["order_status"] = orderStatus
 	}
-	err = b.SignedRequest(http.MethodGet, "open-api/order/list", params, &cResult)
+	var resp []byte
+	resp, err = b.SignedRequest(http.MethodGet, "open-api/order/list", params, &cResult)
 	if err != nil {
 		return
 	}
 	if cResult.RetCode != 0 {
-		err = errors.New(cResult.RetMsg)
+		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
 
@@ -236,12 +242,13 @@ func (b *ByBit) GetStopOrders(orderID string, orderLinkID string, stopOrderStatu
 	}
 	params["page"] = page
 	params["limit"] = limit
-	err = b.SignedRequest(http.MethodGet, "open-api/stop-order/list", params, &cResult)
+	var resp []byte
+	resp, err = b.SignedRequest(http.MethodGet, "open-api/stop-order/list", params, &cResult)
 	if err != nil {
 		return
 	}
 	if cResult.RetCode != 0 {
-		err = errors.New(cResult.RetMsg)
+		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
 
@@ -261,12 +268,13 @@ func (b *ByBit) GetOrderByID(orderID string, orderLinkID string, symbol string) 
 	if orderLinkID != "" {
 		params["order_link_id"] = orderLinkID
 	}
-	err = b.SignedRequest(http.MethodGet, "v2/private/order", params, &cResult)
+	var resp []byte
+	resp, err = b.SignedRequest(http.MethodGet, "v2/private/order", params, &cResult)
 	if err != nil {
 		return
 	}
 	if cResult.RetCode != 0 {
-		err = errors.New(cResult.RetMsg)
+		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
 
@@ -297,12 +305,13 @@ func (b *ByBit) CancelOrder(orderID string, symbol string) (result Order, err er
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	params["order_id"] = orderID
-	err = b.SignedRequest(http.MethodPost, "open-api/order/cancel", params, &cResult)
+	var resp []byte
+	resp, err = b.SignedRequest(http.MethodPost, "open-api/order/cancel", params, &cResult)
 	if err != nil {
 		return
 	}
 	if cResult.RetCode != 0 {
-		err = errors.New(cResult.RetMsg)
+		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
 
@@ -323,12 +332,13 @@ func (b *ByBit) CancelOrderV2(orderID string, orderLinkID string, symbol string)
 	if orderLinkID != "" {
 		params["order_link_id"] = orderLinkID
 	}
-	err = b.SignedRequest(http.MethodPost, "v2/private/order/cancel", params, &cResult)
+	var resp []byte
+	resp, err = b.SignedRequest(http.MethodPost, "v2/private/order/cancel", params, &cResult)
 	if err != nil {
 		return
 	}
 	if cResult.RetCode != 0 {
-		err = errors.New(cResult.RetMsg)
+		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
 
@@ -341,12 +351,13 @@ func (b *ByBit) CancelAllOrder(symbol string) (result []OrderV2, err error) {
 	var cResult CancelAllOrderV2Result
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
-	err = b.SignedRequest(http.MethodPost, "v2/private/order/cancelAll", params, &cResult)
+	var resp []byte
+	resp, err = b.SignedRequest(http.MethodPost, "v2/private/order/cancelAll", params, &cResult)
 	if err != nil {
 		return
 	}
 	if cResult.RetCode != 0 {
-		err = errors.New(cResult.RetMsg)
+		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
 
@@ -362,12 +373,13 @@ func (b *ByBit) CancelStopOrder(orderID string, symbol string) (result Order, er
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	params["stop_order_id"] = orderID
-	err = b.SignedRequest(http.MethodPost, "open-api/stop-order/cancel", params, &cResult)
+	var resp []byte
+	resp, err = b.SignedRequest(http.MethodPost, "open-api/stop-order/cancel", params, &cResult)
 	if err != nil {
 		return
 	}
 	if cResult.RetCode != 0 {
-		err = errors.New(cResult.RetMsg)
+		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
 

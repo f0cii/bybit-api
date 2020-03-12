@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"gopkg.in/resty.v1"
 	"log"
@@ -32,7 +31,7 @@ func (b *ByBit) GetWalletBalance(coin string) (result Balance, err error) {
 	var ret GetBalanceResult
 	params := map[string]interface{}{}
 	params["coin"] = coin
-	err = b.SignedRequest(http.MethodGet, "v2/private/wallet/balance", params, &ret) // v2/private/wallet/balance
+	_, err = b.SignedRequest(http.MethodGet, "v2/private/wallet/balance", params, &ret) // v2/private/wallet/balance
 	if err != nil {
 		return
 	}
@@ -55,7 +54,7 @@ func (b *ByBit) GetWalletBalance(coin string) (result Balance, err error) {
 func (b *ByBit) GetLeverages() (result map[string]LeverageItem, err error) {
 	var r GetLeverageResult
 	params := map[string]interface{}{}
-	err = b.SignedRequest(http.MethodGet, "user/leverage", params, &r)
+	_, err = b.SignedRequest(http.MethodGet, "user/leverage", params, &r)
 	if err != nil {
 		return
 	}
@@ -69,7 +68,7 @@ func (b *ByBit) SetLeverage(leverage int, symbol string) (err error) {
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	params["leverage"] = fmt.Sprintf("%v", leverage)
-	err = b.SignedRequest(http.MethodPost, "user/leverage", params, &r)
+	_, err = b.SignedRequest(http.MethodPost, "user/leverage", params, &r)
 	if err != nil {
 		return
 	}
@@ -82,12 +81,13 @@ func (b *ByBit) GetPositions() (result []Position, err error) {
 	var r PositionListResult
 
 	params := map[string]interface{}{}
-	err = b.SignedRequest(http.MethodGet, "position/list", params, &r)
+	var resp []byte
+	resp, err = b.SignedRequest(http.MethodGet, "position/list", params, &r)
 	if err != nil {
 		return
 	}
 	if r.RetCode != 0 {
-		err = errors.New(r.RetMsg)
+		err = fmt.Errorf("%v body: [%v]", r.RetMsg, string(resp))
 		return
 	}
 
@@ -139,12 +139,13 @@ func (b *ByBit) GetPosition(symbol string) (result Position, err error) {
 
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
-	err = b.SignedRequest(http.MethodGet, "v2/private/position/list", params, &r)
+	var resp []byte
+	resp, err = b.SignedRequest(http.MethodGet, "v2/private/position/list", params, &r)
 	if err != nil {
 		return
 	}
 	if r.RetCode != 0 {
-		err = errors.New(r.RetMsg)
+		err = fmt.Errorf("%v body: [%v]", r.RetMsg, string(resp))
 		return
 	}
 	result = r.Result
@@ -179,7 +180,7 @@ func (b *ByBit) PublicRequest(method string, apiURL string, params map[string]in
 	return err
 }
 
-func (b *ByBit) SignedRequest(method string, apiURL string, params map[string]interface{}, result interface{}) error {
+func (b *ByBit) SignedRequest(method string, apiURL string, params map[string]interface{}, result interface{}) (resp []byte, err error) {
 	timestamp := time.Now().UnixNano() / 1e6
 
 	params["api_key"] = b.apiKey
@@ -201,14 +202,18 @@ func (b *ByBit) SignedRequest(method string, apiURL string, params map[string]in
 	param += "&sign=" + signature
 
 	fullURL := b.baseURL + apiURL + "?" + param
-	r, err := b.client.R().Execute(method, fullURL)
+	var r *resty.Response
+	r, err = b.client.R().Execute(method, fullURL)
 	if err != nil {
-		log.Printf("%v", err)
-		return err
+		return
 	}
 	//log.Println(string(r.Body()))
+	resp = r.Body()
 	err = json.Unmarshal(r.Body(), result)
-	return err
+	if err != nil {
+		err = fmt.Errorf("%v body: [%v]", err, string(resp))
+	}
+	return
 }
 
 func (b *ByBit) getSigned(param string) string {
