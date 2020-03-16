@@ -15,14 +15,26 @@ import (
 )
 
 type ByBit struct {
-	baseURL   string // https://api-testnet.bybit.com/open-api/
-	apiKey    string
-	secretKey string
-	client    *resty.Client
+	baseURL          string // https://api-testnet.bybit.com/open-api/
+	apiKey           string
+	secretKey        string
+	serverTimeOffset int64 // 时间偏差(ms)
+	client           *resty.Client
 }
 
 func New(baseURL string, apiKey string, secretKey string) *ByBit {
 	return &ByBit{baseURL: baseURL, apiKey: apiKey, secretKey: secretKey, client: resty.New()}
+}
+
+// SetCorrectServerTime 校正服务器时间
+func (b *ByBit) SetCorrectServerTime() (err error) {
+	var timeNow int64
+	timeNow, err = b.GetServerTime()
+	if err != nil {
+		return
+	}
+	b.serverTimeOffset = timeNow - time.Now().UnixNano()/1e6
+	return
 }
 
 // GetBalance Get Wallet Balance
@@ -152,7 +164,7 @@ func (b *ByBit) GetPosition(symbol string) (result Position, err error) {
 	return
 }
 
-func (b *ByBit) PublicRequest(method string, apiURL string, params map[string]interface{}, result interface{}) error {
+func (b *ByBit) PublicRequest(method string, apiURL string, params map[string]interface{}, result interface{}) (resp []byte, err error) {
 	var keys []string
 	for k := range params {
 		keys = append(keys, k)
@@ -170,18 +182,20 @@ func (b *ByBit) PublicRequest(method string, apiURL string, params map[string]in
 		fullURL += "?" + param
 	}
 	//log.Println(fullURL)
-	r, err := b.client.R().Execute(method, fullURL)
+	var r *resty.Response
+	r, err = b.client.R().Execute(method, fullURL)
 	if err != nil {
 		log.Printf("%v", err)
-		return err
+		return
 	}
 	//log.Printf("%v", string(r.Body()))
+	resp = r.Body()
 	err = json.Unmarshal(r.Body(), result)
-	return err
+	return
 }
 
 func (b *ByBit) SignedRequest(method string, apiURL string, params map[string]interface{}, result interface{}) (resp []byte, err error) {
-	timestamp := time.Now().UnixNano() / 1e6
+	timestamp := time.Now().UnixNano()/1e6 + b.serverTimeOffset
 
 	params["api_key"] = b.apiKey
 	params["timestamp"] = timestamp

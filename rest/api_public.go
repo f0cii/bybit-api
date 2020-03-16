@@ -7,12 +7,29 @@ import (
 	"time"
 )
 
+// GetServerTime Get server time.
+func (b *ByBit) GetServerTime() (timeNow int64, err error) {
+	params := map[string]interface{}{}
+	var ret BaseResult
+	_, err = b.PublicRequest(http.MethodGet, "v2/public/time", params, &ret)
+	if err != nil {
+		return
+	}
+	var t float64
+	t, err = strconv.ParseFloat(ret.TimeNow, 64)
+	if err != nil {
+		return
+	}
+	timeNow = int64(t * 1000)
+	return
+}
+
 // GetOrderBook Get the orderbook
 func (b *ByBit) GetOrderBook(symbol string) (result OrderBook, err error) {
 	var ret GetOrderBookResult
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
-	err = b.PublicRequest(http.MethodGet, "v2/public/orderBook/L2", params, &ret)
+	_, err = b.PublicRequest(http.MethodGet, "v2/public/orderBook/L2", params, &ret)
 	if err != nil {
 		return
 	}
@@ -62,7 +79,7 @@ func (b *ByBit) GetKLine(symbol string, interval string, from int64, limit int) 
 	if limit > 0 {
 		params["limit"] = limit
 	}
-	err = b.PublicRequest(http.MethodGet, "v2/public/kline/list", params, &ret)
+	_, err = b.PublicRequest(http.MethodGet, "v2/public/kline/list", params, &ret)
 	if err != nil {
 		return
 	}
@@ -74,7 +91,7 @@ func (b *ByBit) GetTickers() (result []Ticker, err error) {
 	// https://api-testnet.bybit.com/v2/public/tickers
 	var ret GetTickersResult
 	params := map[string]interface{}{}
-	err = b.PublicRequest(http.MethodGet, "v2/public/tickers", params, &ret)
+	_, err = b.PublicRequest(http.MethodGet, "v2/public/tickers", params, &ret)
 	if err != nil {
 		return
 	}
@@ -94,7 +111,7 @@ func (b *ByBit) GetTradingRecords(symbol string, from int64, limit int) (result 
 	if limit > 0 {
 		params["limit"] = limit
 	}
-	err = b.PublicRequest(http.MethodGet, "v2/public/trading-records", params, &ret)
+	_, err = b.PublicRequest(http.MethodGet, "v2/public/trading-records", params, &ret)
 	if err != nil {
 		return
 	}
@@ -105,7 +122,7 @@ func (b *ByBit) GetTradingRecords(symbol string, from int64, limit int) (result 
 func (b *ByBit) GetSymbols() (result []SymbolInfo, err error) {
 	var ret GetSymbolsResult
 	params := map[string]interface{}{}
-	err = b.PublicRequest(http.MethodGet, "v2/public/symbols", params, &ret)
+	_, err = b.PublicRequest(http.MethodGet, "v2/public/symbols", params, &ret)
 	if err != nil {
 		return
 	}

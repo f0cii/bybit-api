@@ -15,7 +15,34 @@ func newByBit() *ByBit {
 	apiKey := "6IASD6KDBdunn5qLpT"
 	secretKey := "nXjZMUiB3aMiPaQ9EUKYFloYNd0zM39RjRWF"
 	b := New(baseURL, apiKey, secretKey)
+	err := b.SetCorrectServerTime()
+	if err != nil {
+		return nil
+	}
 	return b
+}
+
+func TestByBit_GetServerTime(t *testing.T) {
+	b := newByBit()
+	timeNow, err := b.GetServerTime()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	now := time.Now().UnixNano() / 1e6
+	t.Logf("timeNow: %v Now: %v Diff: %v",
+		timeNow,
+		now,
+		now-timeNow)
+}
+
+func TestByBit_SetCorrectServerTime(t *testing.T) {
+	b := newByBit()
+	err := b.SetCorrectServerTime()
+	if err != nil {
+		t.Error(err)
+		return
+	}
 }
 
 func TestByBit_GetOrderBook(t *testing.T) {
