@@ -229,7 +229,7 @@ func TestByBit_GetOrders(t *testing.T) {
 func TestByBit_GetOrder(t *testing.T) {
 	b := newByBit()
 	order, err := b.GetOrderByID(
-		"6d3c70d5-529f-4716-9b20-a3c7dc5b6fd5",
+		"9d468e94-14b2-4d2e-88b9-590adaee3549",
 		"",
 		"BTCUSD",
 	)

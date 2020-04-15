@@ -100,10 +100,12 @@ func (b *ByBitWS) IsConnected() bool {
 }
 
 func (b *ByBitWS) Subscribe(arg string) {
-	b.subscribeCmds = append(b.subscribeCmds, Cmd{
+	cmd := Cmd{
 		Op:   "subscribe",
 		Args: []interface{}{arg},
-	})
+	}
+	b.subscribeCmds = append(b.subscribeCmds, cmd)
+	b.SendCmd(cmd)
 }
 
 func (b *ByBitWS) SendCmd(cmd Cmd) error {
