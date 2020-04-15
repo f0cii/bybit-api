@@ -265,6 +265,7 @@ type Order struct {
 }
 
 type ExtFields struct {
+	ReduceOnly  bool   `json:"reduce_only"`
 	OpFrom      string `json:"op_from"`
 	Remark      string `json:"remark"`
 	OReqNum     int64  `json:"o_req_num"`
@@ -273,6 +274,7 @@ type ExtFields struct {
 }
 
 type InExtFields struct {
+	ReduceOnly  bool   `json:"reduce_only"`
 	OpFrom      string `json:"op_from"`
 	Remark      string `json:"remark"`
 	OReqNum     int64  `json:"o_req_num"`
@@ -291,6 +293,7 @@ func (e *ExtFields) UnmarshalJSON(b []byte) error {
 	}
 	o := InExtFields{}
 	if err := json.Unmarshal(b, &o); err == nil {
+		e.ReduceOnly = o.ReduceOnly
 		e.OpFrom = o.OpFrom
 		e.Remark = o.Remark
 		e.OReqNum = o.OReqNum
