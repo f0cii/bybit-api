@@ -36,11 +36,11 @@ const (
 )
 
 const (
-	WSOrderBook25L1 = "order_book_25L1" // 新版25档orderBook: order_book_25L1.BTCUSD
-	WSKLine         = "kline"           // K线: kline.BTCUSD.1m
-	WSTrade         = "trade"           // 实时交易: trade/trade.BTCUSD
-	WSInsurance     = "insurance"       // 每日保险基金更新: insurance
-	WSInstrument    = "instrument"      // 产品最新行情: instrument
+	WSOrderBook25L1 = "orderBookL2_25" // 新版25档orderBook: order_book_25L1.BTCUSD
+	WSKLine         = "kline"          // K线: kline.BTCUSD.1m
+	WSTrade         = "trade"          // 实时交易: trade/trade.BTCUSD
+	WSInsurance     = "insurance"      // 每日保险基金更新: insurance
+	WSInstrument    = "instrument"     // 产品最新行情: instrument
 
 	WSPosition  = "position"  // 仓位变化: position
 	WSExecution = "execution" // 委托单成交信息: execution
