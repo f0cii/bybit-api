@@ -1,12 +1,13 @@
 package rest
 
 import (
+	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"gopkg.in/resty.v1"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"sort"
@@ -19,11 +20,21 @@ type ByBit struct {
 	apiKey           string
 	secretKey        string
 	serverTimeOffset int64 // 时间偏差(ms)
-	client           *resty.Client
+	client           *http.Client
 }
 
-func New(baseURL string, apiKey string, secretKey string) *ByBit {
-	return &ByBit{baseURL: baseURL, apiKey: apiKey, secretKey: secretKey, client: resty.New()}
+func New(httpClient *http.Client, baseURL string, apiKey string, secretKey string) *ByBit {
+	if httpClient == nil {
+		httpClient = &http.Client{
+			Timeout: 10 * time.Second,
+		}
+	}
+	return &ByBit{
+		baseURL:   baseURL,
+		apiKey:    apiKey,
+		secretKey: secretKey,
+		client:    httpClient,
+	}
 }
 
 // SetCorrectServerTime 校正服务器时间
@@ -182,15 +193,29 @@ func (b *ByBit) PublicRequest(method string, apiURL string, params map[string]in
 		fullURL += "?" + param
 	}
 	//log.Println(fullURL)
-	var r *resty.Response
-	r, err = b.client.R().Execute(method, fullURL)
+	var binBody = bytes.NewReader(make([]byte, 0))
+
+	// get a http request
+	var request *http.Request
+	request, err = http.NewRequest(method, fullURL, binBody)
 	if err != nil {
-		log.Printf("%v", err)
 		return
 	}
+
+	var response *http.Response
+	response, err = b.client.Do(request)
+	if err != nil {
+		return
+	}
+	defer response.Body.Close()
+
+	resp, err = ioutil.ReadAll(response.Body)
+	if err != nil {
+		return
+	}
+
 	//log.Printf("%v", string(r.Body()))
-	resp = r.Body()
-	err = json.Unmarshal(r.Body(), result)
+	err = json.Unmarshal(resp, result)
 	return
 }
 
@@ -216,17 +241,30 @@ func (b *ByBit) SignedRequest(method string, apiURL string, params map[string]in
 	param += "&sign=" + signature
 
 	fullURL := b.baseURL + apiURL + "?" + param
-	var r *resty.Response
-	r, err = b.client.R().Execute(method, fullURL)
+	//log.Println(fullURL)
+	var binBody = bytes.NewReader(make([]byte, 0))
+
+	// get a http request
+	var request *http.Request
+	request, err = http.NewRequest(method, fullURL, binBody)
 	if err != nil {
 		return
 	}
-	//log.Println(string(r.Body()))
-	resp = r.Body()
-	err = json.Unmarshal(r.Body(), result)
+
+	var response *http.Response
+	response, err = b.client.Do(request)
 	if err != nil {
-		err = fmt.Errorf("%v body: [%v]", err, string(resp))
+		return
 	}
+	defer response.Body.Close()
+
+	resp, err = ioutil.ReadAll(response.Body)
+	if err != nil {
+		return
+	}
+
+	//log.Printf("%v", string(r.Body()))
+	err = json.Unmarshal(resp, result)
 	return
 }
 

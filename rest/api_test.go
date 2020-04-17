@@ -14,7 +14,7 @@ func newByBit() *ByBit {
 	baseURL := "https://api-testnet.bybit.com/"
 	apiKey := "6IASD6KDBdunn5qLpT"
 	secretKey := "nXjZMUiB3aMiPaQ9EUKYFloYNd0zM39RjRWF"
-	b := New(baseURL, apiKey, secretKey)
+	b := New(nil, baseURL, apiKey, secretKey)
 	err := b.SetCorrectServerTime()
 	if err != nil {
 		return nil
