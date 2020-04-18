@@ -9,10 +9,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/chuckpreslar/emission"
+	"github.com/gorilla/websocket"
+	"github.com/recws-org/recws"
 	"github.com/tidwall/gjson"
 	"log"
-	"net/http"
-	"nhooyr.io/websocket"
 	"strings"
 	"sync"
 	"time"
@@ -62,10 +62,11 @@ type Configuration struct {
 }
 
 type ByBitWS struct {
-	cfg         *Configuration
-	conn        *websocket.Conn
-	mu          sync.RWMutex
-	isConnected bool
+	cfg    *Configuration
+	ctx    context.Context
+	cancel context.CancelFunc
+	conn   recws.RecConn
+	mu     sync.RWMutex
 
 	subscribeCmds   []Cmd
 	orderBookLocals map[string]*OrderBookLocal // key: symbol
@@ -79,24 +80,39 @@ func New(config *Configuration) *ByBitWS {
 		emitter:         emission.NewEmitter(),
 		orderBookLocals: make(map[string]*OrderBookLocal),
 	}
-	b.On(EventDisconnected, b.handleDisconnected)
+	b.ctx, b.cancel = context.WithCancel(context.Background())
+	b.conn = recws.RecConn{
+		KeepAliveTimeout: 10 * time.Second,
+	}
+	b.conn.SubscribeHandler = b.subscribeHandler
 	return b
 }
 
-// setIsConnected sets state for isConnected
-func (b *ByBitWS) setIsConnected(state bool) {
+func (b *ByBitWS) subscribeHandler() error {
+	log.Printf("subscribeHandler")
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
-	b.isConnected = state
+	if b.cfg.ApiKey != "" && b.cfg.SecretKey != "" {
+		b.Auth()
+	}
+
+	for _, cmd := range b.subscribeCmds {
+		b.SendCmd(cmd)
+	}
+
+	return nil
+}
+
+func (b *ByBitWS) closeHandler(code int, text string) error {
+	log.Printf("close handle executed code=%v text=%v",
+		code, text)
+	return nil
 }
 
 // IsConnected returns the WebSocket connection state
 func (b *ByBitWS) IsConnected() bool {
-	b.mu.RLock()
-	defer b.mu.RUnlock()
-
-	return b.isConnected
+	return b.conn.IsConnected()
 }
 
 func (b *ByBitWS) Subscribe(arg string) {
@@ -123,38 +139,13 @@ func (b *ByBitWS) Send(msg string) (err error) {
 		}
 	}()
 
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = b.conn.Write(ctx, websocket.MessageText, []byte(msg))
+	err = b.conn.WriteMessage(websocket.TextMessage, []byte(msg))
 	return
 }
 
 func (b *ByBitWS) Start() error {
-	b.setIsConnected(false)
-
-	b.conn = nil
-	for i := 0; i < MaxTryTimes; i++ {
-		c, _, err := b.connect()
-		if err != nil {
-			log.Println(err)
-			time.Sleep(1 * time.Second)
-			continue
-		}
-		b.conn = c
-		break
-	}
-	if b.conn == nil {
-		return errors.New("connect fail")
-	}
-
-	b.setIsConnected(true)
-
-	if b.cfg.ApiKey != "" && b.cfg.SecretKey != "" {
-		b.Auth()
-	}
-
-	for _, cmd := range b.subscribeCmds {
-		b.SendCmd(cmd)
-	}
+	b.connect()
+	b.conn.SetCloseHandler(b.closeHandler)
 
 	cancel := make(chan struct{})
 
@@ -173,20 +164,10 @@ func (b *ByBitWS) Start() error {
 		defer close(cancel)
 
 		for {
-			ctx := context.Background()
-			messageType, data, err := b.conn.Read(ctx)
+			messageType, data, err := b.conn.ReadMessage()
 			if err != nil {
 				log.Printf("Read error: %v", err)
-				if strings.Contains(err.Error(), "context deadline exceeded") {
-					log.Println("111")
-					time.Sleep(3 * time.Second)
-					continue
-				}
-				//if err == context.DeadlineExceeded {
-				//	continue
-				//}
-				log.Printf("%v", err)
-				b.Emit(EventDisconnected)
+				time.Sleep(100 * time.Millisecond)
 				return
 			}
 
@@ -197,24 +178,8 @@ func (b *ByBitWS) Start() error {
 	return nil
 }
 
-func (b *ByBitWS) handleDisconnected() {
-	log.Println("handleDisconnected")
-
-	if !b.cfg.AutoReconnect {
-		return
-	}
-
-	log.Println("close")
-
-	b.Close()
-	b.Start()
-}
-
-func (b *ByBitWS) connect() (*websocket.Conn, *http.Response, error) {
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	//defer cancel()
-	c, resp, err := websocket.Dial(ctx, b.cfg.Addr, &websocket.DialOptions{})
-	return c, resp, err
+func (b *ByBitWS) connect() {
+	b.conn.Dial(b.cfg.Addr, nil)
 }
 
 func (b *ByBitWS) ping() {
@@ -227,11 +192,7 @@ func (b *ByBitWS) ping() {
 	if !b.IsConnected() {
 		return
 	}
-	if b.conn == nil {
-		return
-	}
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err := b.conn.Write(ctx, websocket.MessageText, []byte(`{"op":"ping"}`))
+	err := b.conn.WriteMessage(websocket.TextMessage, []byte(`{"op":"ping"}`))
 	if err != nil {
 		log.Printf("ping error: %v", err)
 	}
@@ -258,7 +219,7 @@ func (b *ByBitWS) Auth() error {
 	return err
 }
 
-func (b *ByBitWS) processMessage(messageType websocket.MessageType, data []byte) {
+func (b *ByBitWS) processMessage(messageType int, data []byte) {
 	ret := gjson.ParseBytes(data)
 
 	if b.cfg.DebugMode {
@@ -387,9 +348,5 @@ func (b *ByBitWS) processMessage(messageType websocket.MessageType, data []byte)
 }
 
 func (b *ByBitWS) Close() {
-	if b.conn == nil {
-		return
-	}
-	b.conn.Close(websocket.StatusNormalClosure, "")
-	b.setIsConnected(false)
+	b.conn.Close()
 }
