@@ -5,7 +5,6 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/chuckpreslar/emission"
@@ -46,11 +45,11 @@ const (
 	WSExecution = "execution" // 委托单成交信息: execution
 	WSOrder     = "order"     // 委托单的更新: order
 
-	EventDisconnected = "disconnected" // 连接断开事件
+	WSDisconnected = "disconnected" // WS断开事件
 )
 
 var (
-	topic_order_book_25L1Prefix = WSOrderBook25L1 + "."
+	topicOrderBook25l1prefix = WSOrderBook25L1 + "."
 )
 
 type Configuration struct {
@@ -238,8 +237,8 @@ func (b *ByBitWS) processMessage(messageType int, data []byte) {
 
 	topic := ret.Get("topic").String()
 	if topic != "" {
-		if strings.HasPrefix(topic, topic_order_book_25L1Prefix) {
-			symbol := topic[len(topic_order_book_25L1Prefix):]
+		if strings.HasPrefix(topic, topicOrderBook25l1prefix) {
+			symbol := topic[len(topicOrderBook25l1prefix):]
 			type_ := ret.Get("type").String()
 			raw := ret.Get("data").Raw
 

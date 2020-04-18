@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"encoding/json"
+	sjson "encoding/json"
 	"strings"
 	"time"
 )
@@ -239,29 +239,29 @@ type OrderListResult struct {
 
 // Order ...
 type Order struct {
-	OrderID       string      `json:"order_id"`
-	StopOrderID   string      `json:"stop_order_id"`
-	UserID        int         `json:"user_id"`
-	Symbol        string      `json:"symbol"`
-	Side          string      `json:"side"`
-	OrderType     string      `json:"order_type"`
-	Price         float64     `json:"price"`
-	Qty           float64     `json:"qty"`
-	TimeInForce   string      `json:"time_in_force"`
-	StopOrderType string      `json:"stop_order_type,omitempty"`
-	StopPx        json.Number `json:"stop_px,omitempty"`
-	OrderStatus   string      `json:"order_status"`
-	LastExecTime  string      `json:"last_exec_time"`
-	LastExecPrice float64     `json:"last_exec_price"`
-	LeavesQty     float64     `json:"leaves_qty"`
-	CumExecQty    float64     `json:"cum_exec_qty"`
-	CumExecValue  float64     `json:"cum_exec_value"`
-	CumExecFee    float64     `json:"cum_exec_fee"`
-	RejectReason  string      `json:"reject_reason"`
-	OrderLinkID   string      `json:"order_link_id"`
-	CreatedAt     time.Time   `json:"created_at"`
-	UpdatedAt     time.Time   `json:"updated_at"`
-	ExtFields     *ExtFields  `json:"ext_fields,omitempty"`
+	OrderID       string       `json:"order_id"`
+	StopOrderID   string       `json:"stop_order_id"`
+	UserID        int          `json:"user_id"`
+	Symbol        string       `json:"symbol"`
+	Side          string       `json:"side"`
+	OrderType     string       `json:"order_type"`
+	Price         float64      `json:"price"`
+	Qty           float64      `json:"qty"`
+	TimeInForce   string       `json:"time_in_force"`
+	StopOrderType string       `json:"stop_order_type,omitempty"`
+	StopPx        sjson.Number `json:"stop_px,omitempty"`
+	OrderStatus   string       `json:"order_status"`
+	LastExecTime  string       `json:"last_exec_time"`
+	LastExecPrice float64      `json:"last_exec_price"`
+	LeavesQty     float64      `json:"leaves_qty"`
+	CumExecQty    float64      `json:"cum_exec_qty"`
+	CumExecValue  float64      `json:"cum_exec_value"`
+	CumExecFee    float64      `json:"cum_exec_fee"`
+	RejectReason  string       `json:"reject_reason"`
+	OrderLinkID   string       `json:"order_link_id"`
+	CreatedAt     time.Time    `json:"created_at"`
+	UpdatedAt     time.Time    `json:"updated_at"`
+	ExtFields     *ExtFields   `json:"ext_fields,omitempty"`
 }
 
 type ExtFields struct {
@@ -405,25 +405,25 @@ type GetPositionResult struct {
 }
 
 type OrderV2 struct {
-	UserID        int         `json:"user_id"`
-	OrderID       string      `json:"order_id"`
-	Symbol        string      `json:"symbol"`
-	Side          string      `json:"side"`
-	OrderType     string      `json:"order_type"`
-	Price         json.Number `json:"price"`
-	Qty           float64     `json:"qty"`
-	TimeInForce   string      `json:"time_in_force"`
-	OrderStatus   string      `json:"order_status"`
-	LastExecTime  json.Number `json:"last_exec_time"`
-	LastExecPrice json.Number `json:"last_exec_price"`
-	LeavesQty     int         `json:"leaves_qty"`
-	CumExecQty    int         `json:"cum_exec_qty"`
-	CumExecValue  json.Number `json:"cum_exec_value"`
-	CumExecFee    json.Number `json:"cum_exec_fee"`
-	RejectReason  string      `json:"reject_reason"`
-	OrderLinkID   string      `json:"order_link_id"`
-	CreatedAt     time.Time   `json:"created_at"`
-	UpdatedAt     time.Time   `json:"updated_at"`
+	UserID        int          `json:"user_id"`
+	OrderID       string       `json:"order_id"`
+	Symbol        string       `json:"symbol"`
+	Side          string       `json:"side"`
+	OrderType     string       `json:"order_type"`
+	Price         sjson.Number `json:"price"`
+	Qty           float64      `json:"qty"`
+	TimeInForce   string       `json:"time_in_force"`
+	OrderStatus   string       `json:"order_status"`
+	LastExecTime  sjson.Number `json:"last_exec_time"`
+	LastExecPrice sjson.Number `json:"last_exec_price"`
+	LeavesQty     int          `json:"leaves_qty"`
+	CumExecQty    int          `json:"cum_exec_qty"`
+	CumExecValue  sjson.Number `json:"cum_exec_value"`
+	CumExecFee    sjson.Number `json:"cum_exec_fee"`
+	RejectReason  string       `json:"reject_reason"`
+	OrderLinkID   string       `json:"order_link_id"`
+	CreatedAt     time.Time    `json:"created_at"`
+	UpdatedAt     time.Time    `json:"updated_at"`
 }
 
 type CreateOrderV2Result struct {
