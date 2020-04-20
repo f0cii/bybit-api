@@ -63,8 +63,7 @@ func TestOrderBookL2(t *testing.T) {
 	b := New(cfg)
 
 	// 订阅新版25档orderBook
-	// b.Subscribe(WSOrderBook25L1 + ".BTCUSD")
-	b.Subscribe("orderBookL2_25" + ".BTCUSD")
+	b.Subscribe(WSOrderBook25L1 + ".BTCUSD")
 
 	b.On(WSOrderBook25L1, handleOrderBook)
 

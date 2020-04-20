@@ -226,17 +226,17 @@ func (b *ByBitWS) processMessage(messageType int, data []byte) {
 	}
 
 	// 处理心跳包
-	retMsg := ret.Get("ret_msg").String()
-	if retMsg != "" && retMsg == "pong" {
-		return
-	}
+	//retMsg := ret.Get("ret_msg").String()
+	//if retMsg != "" && retMsg == "pong" {
+	//	return
+	//}
 
-	if ret.Get("success").Exists() {
-		return
-	}
+	//if ret.Get("success").Exists() {
+	//	return
+	//}
 
-	topic := ret.Get("topic").String()
-	if topic != "" {
+	if topicValue := ret.Get("topic"); topicValue.Exists() {
+		topic := topicValue.String()
 		if strings.HasPrefix(topic, topicOrderBook25l1prefix) {
 			symbol := topic[len(topicOrderBook25l1prefix):]
 			type_ := ret.Get("type").String()
