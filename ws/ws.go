@@ -81,7 +81,7 @@ func New(config *Configuration) *ByBitWS {
 	}
 	b.ctx, b.cancel = context.WithCancel(context.Background())
 	b.conn = &recws.RecConn{
-		KeepAliveTimeout: 10 * time.Second,
+		KeepAliveTimeout: 60 * time.Second,
 	}
 	b.conn.SubscribeHandler = b.subscribeHandler
 	return b
@@ -155,9 +155,11 @@ func (b *ByBitWS) Start() error {
 	cancel := make(chan struct{})
 
 	go func() {
+		t := time.NewTicker(time.Second * 5)
+		defer t.Stop()
 		for {
 			select {
-			case <-time.After(30 * time.Second):
+			case <-t.C:
 				b.ping()
 			case <-cancel:
 				return
@@ -232,14 +234,9 @@ func (b *ByBitWS) processMessage(messageType int, data []byte) {
 	}
 
 	// 处理心跳包
-	//retMsg := ret.Get("ret_msg").String()
-	//if retMsg != "" && retMsg == "pong" {
-	//	return
-	//}
-
-	//if ret.Get("success").Exists() {
-	//	return
-	//}
+	if ret.Get("ret_msg").String() == "pong" {
+		b.handlePong()
+	}
 
 	if topicValue := ret.Get("topic"); topicValue.Exists() {
 		topic := topicValue.String()
@@ -350,6 +347,19 @@ func (b *ByBitWS) processMessage(messageType int, data []byte) {
 		}
 		return
 	}
+}
+
+func (b *ByBitWS) handlePong() (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New(fmt.Sprintf("handlePong error: %v", r))
+		}
+	}()
+	pongHandler := b.conn.PongHandler()
+	if pongHandler != nil {
+		pongHandler("pong")
+	}
+	return nil
 }
 
 func (b *ByBitWS) Close() {

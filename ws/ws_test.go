@@ -8,10 +8,13 @@ import (
 
 func TestConnect(t *testing.T) {
 	cfg := &Configuration{
-		Addr:          HostTestnet,
-		ApiKey:        "wKuYtkeNdC2PaMKjoy",
-		SecretKey:     "5ekcDn3KnKoCRbfvrPImYzVdx7Ri2hhVxkmw",
+		Addr: HostTestnet,
+		//ApiKey:        "wKuYtkeNdC2PaMKjoy",
+		//SecretKey:     "5ekcDn3KnKoCRbfvrPImYzVdx7Ri2hhVxkmw",
+		ApiKey:        "6IASD6KDBdunn5qLpT",
+		SecretKey:     "nXjZMUiB3aMiPaQ9EUKYFloYNd0zM39RjRWF",
 		AutoReconnect: true,
+		DebugMode:     true,
 	}
 	b := New(cfg)
 
@@ -56,15 +59,15 @@ func handleOrder(data []*Order) {
 func TestOrderBookL2(t *testing.T) {
 	cfg := &Configuration{
 		Addr:          HostTestnet,
-		ApiKey:        "wKuYtkeNdC2PaMKjoy",
-		SecretKey:     "5ekcDn3KnKoCRbfvrPImYzVdx7Ri2hhVxkmw",
+		ApiKey:        "6IASD6KDBdunn5qLpT",
+		SecretKey:     "nXjZMUiB3aMiPaQ9EUKYFloYNd0zM39RjRWF",
 		AutoReconnect: true,
 		DebugMode:     true,
 	}
 	b := New(cfg)
 
 	// 订阅新版25档orderBook
-	//b.Subscribe(WSOrderBook25L1 + ".BTCUSD")
+	b.Subscribe(WSOrderBook25L1 + ".BTCUSD")
 
 	b.On(WSOrderBook25L1, handleOrderBook)
 
