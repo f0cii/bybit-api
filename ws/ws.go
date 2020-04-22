@@ -64,7 +64,7 @@ type ByBitWS struct {
 	cfg    *Configuration
 	ctx    context.Context
 	cancel context.CancelFunc
-	conn   recws.RecConn
+	conn   *recws.RecConn
 	mu     sync.RWMutex
 
 	subscribeCmds   []Cmd
@@ -80,7 +80,7 @@ func New(config *Configuration) *ByBitWS {
 		orderBookLocals: make(map[string]*OrderBookLocal),
 	}
 	b.ctx, b.cancel = context.WithCancel(context.Background())
-	b.conn = recws.RecConn{
+	b.conn = &recws.RecConn{
 		KeepAliveTimeout: 10 * time.Second,
 	}
 	b.conn.SubscribeHandler = b.subscribeHandler
@@ -89,7 +89,7 @@ func New(config *Configuration) *ByBitWS {
 
 func (b *ByBitWS) subscribeHandler() error {
 	log.Printf("subscribeHandler")
-	b.conn.SetCloseHandler(b.closeHandler)
+
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
