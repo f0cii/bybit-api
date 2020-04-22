@@ -93,11 +93,17 @@ func (b *ByBitWS) subscribeHandler() error {
 	defer b.mu.Unlock()
 
 	if b.cfg.ApiKey != "" && b.cfg.SecretKey != "" {
-		b.Auth()
+		err := b.Auth()
+		if err != nil {
+			log.Printf("auth error: %v", err)
+		}
 	}
 
 	for _, cmd := range b.subscribeCmds {
-		b.SendCmd(cmd)
+		err := b.SendCmd(cmd)
+		if err != nil {
+			log.Printf("SendCmd return error: %v", err)
+		}
 	}
 
 	return nil

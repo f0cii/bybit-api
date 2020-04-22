@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"github.com/tidwall/gjson"
 	"log"
 	"testing"
 )
@@ -63,7 +64,7 @@ func TestOrderBookL2(t *testing.T) {
 	b := New(cfg)
 
 	// 订阅新版25档orderBook
-	b.Subscribe(WSOrderBook25L1 + ".BTCUSD")
+	//b.Subscribe(WSOrderBook25L1 + ".BTCUSD")
 
 	b.On(WSOrderBook25L1, handleOrderBook)
 
@@ -112,4 +113,17 @@ func TestOrderBookL2(t *testing.T) {
 
 	forever := make(chan struct{})
 	<-forever
+}
+
+func TestParseOrderEvent(t *testing.T) {
+	s := `{"topic":"order","data":[{"order_id":"24e9c496-fe71-48d8-9452-4244a3779c42","order_link_id":"","symbol":"BTCUSD","side":"Sell","order_type":"Market",
+"price":"6855","qty":1,"time_in_force":"ImmediateOrCancel","create_type":"CreateByUser","cancel_type":"","order_status":"Filled","leaves_qty":0,"cum_exec_qty":1,"cum_exec_value":"0.00014588","cum_exec_fee":"0.00000011","timestamp":"2020-04-22T02:15:51.746Z","take_profit":"0","stop_loss":"0","trailing_stop":"0","last_exec_price":"6854.5"
+}]}`
+	ret := gjson.Parse(s)
+	raw := ret.Get("data").Raw
+	var data []*Order
+	err := json.Unmarshal([]byte(raw), &data)
+	if err != nil {
+		t.Error(err)
+	}
 }

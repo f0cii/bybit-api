@@ -2,6 +2,7 @@ package rest
 
 import (
 	"github.com/stretchr/testify/assert"
+	"log"
 	"testing"
 	"time"
 )
@@ -14,10 +15,10 @@ func newByBit() *ByBit {
 	baseURL := "https://api-testnet.bybit.com/"
 	apiKey := "6IASD6KDBdunn5qLpT"
 	secretKey := "nXjZMUiB3aMiPaQ9EUKYFloYNd0zM39RjRWF"
-	b := New(nil, baseURL, apiKey, secretKey)
+	b := New(nil, baseURL, apiKey, secretKey, true)
 	err := b.SetCorrectServerTime()
 	if err != nil {
-		return nil
+		log.Printf("%v", err)
 	}
 	return b
 }
@@ -145,8 +146,7 @@ func TestByBit_CreateOrderV2(t *testing.T) {
 		false,
 		false,
 		"",
-		symbol,
-	)
+		symbol)
 	if err != nil {
 		t.Error(err)
 		return
@@ -231,8 +231,7 @@ func TestByBit_GetOrder(t *testing.T) {
 	order, err := b.GetOrderByID(
 		"9d468e94-14b2-4d2e-88b9-590adaee3549",
 		"",
-		"BTCUSD",
-	)
+		"BTCUSD")
 	if err != nil {
 		t.Error(err)
 		return

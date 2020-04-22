@@ -20,9 +20,10 @@ type ByBit struct {
 	secretKey        string
 	serverTimeOffset int64 // 时间偏差(ms)
 	client           *http.Client
+	debugMode        bool
 }
 
-func New(httpClient *http.Client, baseURL string, apiKey string, secretKey string) *ByBit {
+func New(httpClient *http.Client, baseURL string, apiKey string, secretKey string, debugMode bool) *ByBit {
 	if httpClient == nil {
 		httpClient = &http.Client{
 			Timeout: 10 * time.Second,
@@ -33,6 +34,7 @@ func New(httpClient *http.Client, baseURL string, apiKey string, secretKey strin
 		apiKey:    apiKey,
 		secretKey: secretKey,
 		client:    httpClient,
+		debugMode: debugMode,
 	}
 }
 
@@ -191,7 +193,9 @@ func (b *ByBit) PublicRequest(method string, apiURL string, params map[string]in
 	if param != "" {
 		fullURL += "?" + param
 	}
-	//log.Println(fullURL)
+	if b.debugMode {
+		log.Printf("PublicRequest: %v", fullURL)
+	}
 	var binBody = bytes.NewReader(make([]byte, 0))
 
 	// get a http request
@@ -213,7 +217,10 @@ func (b *ByBit) PublicRequest(method string, apiURL string, params map[string]in
 		return
 	}
 
-	//log.Printf("%v", string(r.Body()))
+	if b.debugMode {
+		log.Printf("PublicRequest: %v", string(resp))
+	}
+
 	err = json.Unmarshal(resp, result)
 	return
 }
@@ -240,7 +247,9 @@ func (b *ByBit) SignedRequest(method string, apiURL string, params map[string]in
 	param += "&sign=" + signature
 
 	fullURL := b.baseURL + apiURL + "?" + param
-	//log.Println(fullURL)
+	if b.debugMode {
+		log.Printf("SignedRequest: %v", fullURL)
+	}
 	var binBody = bytes.NewReader(make([]byte, 0))
 
 	// get a http request
@@ -262,7 +271,10 @@ func (b *ByBit) SignedRequest(method string, apiURL string, params map[string]in
 		return
 	}
 
-	//log.Printf("%v", string(r.Body()))
+	if b.debugMode {
+		log.Printf("SignedRequest: %v", string(resp))
+	}
+
 	err = json.Unmarshal(resp, result)
 	return
 }
