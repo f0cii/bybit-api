@@ -89,6 +89,7 @@ func New(config *Configuration) *ByBitWS {
 
 func (b *ByBitWS) subscribeHandler() error {
 	log.Printf("subscribeHandler")
+	b.conn.SetCloseHandler(b.closeHandler)
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
@@ -150,7 +151,6 @@ func (b *ByBitWS) Send(msg string) (err error) {
 
 func (b *ByBitWS) Start() error {
 	b.connect()
-	b.conn.SetCloseHandler(b.closeHandler)
 
 	cancel := make(chan struct{})
 
