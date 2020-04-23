@@ -239,29 +239,30 @@ type OrderListResult struct {
 
 // Order ...
 type Order struct {
-	OrderID       string       `json:"order_id"`
-	StopOrderID   string       `json:"stop_order_id"`
-	UserID        int          `json:"user_id"`
-	Symbol        string       `json:"symbol"`
-	Side          string       `json:"side"`
-	OrderType     string       `json:"order_type"`
-	Price         float64      `json:"price"`
-	Qty           float64      `json:"qty"`
-	TimeInForce   string       `json:"time_in_force"`
-	StopOrderType string       `json:"stop_order_type,omitempty"`
-	StopPx        sjson.Number `json:"stop_px,omitempty"`
-	OrderStatus   string       `json:"order_status"`
-	LastExecTime  string       `json:"last_exec_time"`
-	LastExecPrice float64      `json:"last_exec_price"`
-	LeavesQty     float64      `json:"leaves_qty"`
-	CumExecQty    float64      `json:"cum_exec_qty"`
-	CumExecValue  float64      `json:"cum_exec_value"`
-	CumExecFee    float64      `json:"cum_exec_fee"`
-	RejectReason  string       `json:"reject_reason"`
-	OrderLinkID   string       `json:"order_link_id"`
-	CreatedAt     time.Time    `json:"created_at"`
-	UpdatedAt     time.Time    `json:"updated_at"`
-	ExtFields     *ExtFields   `json:"ext_fields,omitempty"`
+	OrderID string `json:"order_id"`
+	//StopOrderID     string       `json:"stop_order_id"`
+	UserID      int     `json:"user_id"`
+	Symbol      string  `json:"symbol"`
+	Side        string  `json:"side"`
+	OrderType   string  `json:"order_type"`
+	Price       float64 `json:"price"`
+	Qty         float64 `json:"qty"`
+	TimeInForce string  `json:"time_in_force"`
+	//StopOrderType   string       `json:"stop_order_type,omitempty"`
+	//StopPx          sjson.Number `json:"stop_px,omitempty"`
+	OrderStatus string `json:"order_status"`
+	//StopOrderStatus string       `json:"stop_order_status"`
+	LastExecTime  string     `json:"last_exec_time"`
+	LastExecPrice float64    `json:"last_exec_price"`
+	LeavesQty     float64    `json:"leaves_qty"`
+	CumExecQty    float64    `json:"cum_exec_qty"`
+	CumExecValue  float64    `json:"cum_exec_value"`
+	CumExecFee    float64    `json:"cum_exec_fee"`
+	RejectReason  string     `json:"reject_reason"`
+	OrderLinkID   string     `json:"order_link_id"`
+	CreatedAt     time.Time  `json:"created_at"`
+	UpdatedAt     time.Time  `json:"updated_at"`
+	ExtFields     *ExtFields `json:"ext_fields,omitempty"`
 }
 
 type ExtFields struct {
@@ -416,8 +417,8 @@ type OrderV2 struct {
 	OrderStatus   string       `json:"order_status"`
 	LastExecTime  sjson.Number `json:"last_exec_time"`
 	LastExecPrice sjson.Number `json:"last_exec_price"`
-	LeavesQty     int          `json:"leaves_qty"`
-	CumExecQty    int          `json:"cum_exec_qty"`
+	LeavesQty     float64      `json:"leaves_qty"`
+	CumExecQty    float64      `json:"cum_exec_qty"`
 	CumExecValue  sjson.Number `json:"cum_exec_value"`
 	CumExecFee    sjson.Number `json:"cum_exec_fee"`
 	RejectReason  string       `json:"reject_reason"`
@@ -472,4 +473,77 @@ type QueryOrderResult struct {
 	RateLimitStatus  int     `json:"rate_limit_status"`
 	RateLimitResetMs int64   `json:"rate_limit_reset_ms"`
 	RateLimit        int     `json:"rate_limit"`
+}
+
+type StopOrderV2 struct {
+	ClOrdID           string       `json:"clOrdID"`
+	UserID            int64        `json:"user_id"`
+	Symbol            string       `json:"symbol"`
+	Side              string       `json:"side"`
+	OrderType         string       `json:"order_type"`
+	Price             sjson.Number `json:"price"`
+	Qty               float64      `json:"qty"`
+	TimeInForce       string       `json:"time_in_force"`
+	CreateType        string       `json:"create_type"`
+	CancelType        string       `json:"cancel_type"`
+	OrderStatus       string       `json:"order_status"`
+	LeavesQty         float64      `json:"leaves_qty"`
+	LeavesValue       string       `json:"leaves_value"`
+	CreatedAt         time.Time    `json:"created_at"`
+	UpdatedAt         time.Time    `json:"updated_at"`
+	CrossStatus       string       `json:"cross_status"`
+	CrossSeq          float64      `json:"cross_seq"`
+	StopOrderType     string       `json:"stop_order_type"`
+	TriggerBy         string       `json:"trigger_by"`
+	BasePrice         sjson.Number `json:"base_price"`
+	ExpectedDirection string       `json:"expected_direction"`
+}
+
+type CancelStopOrdersV2Result struct {
+	RetCode          int           `json:"ret_code"`
+	RetMsg           string        `json:"ret_msg"`
+	ExtCode          string        `json:"ext_code"`
+	ExtInfo          string        `json:"ext_info"`
+	Result           []StopOrderV2 `json:"result"`
+	TimeNow          string        `json:"time_now"`
+	RateLimitStatus  int           `json:"rate_limit_status"`
+	RateLimitResetMs int64         `json:"rate_limit_reset_ms"`
+	RateLimit        int           `json:"rate_limit"`
+}
+
+type StopOrder struct {
+	UserID          int64     `json:"user_id"`
+	StopOrderStatus string    `json:"stop_order_status"`
+	Symbol          string    `json:"symbol"`
+	Side            string    `json:"side"`
+	OrderType       string    `json:"order_type"`
+	Price           float64   `json:"price"`
+	Qty             float64   `json:"qty"`
+	TimeInForce     string    `json:"time_in_force"`
+	StopOrderType   string    `json:"stop_order_type"`
+	TriggerBy       string    `json:"trigger_by"`
+	BasePrice       float64   `json:"base_price"`
+	OrderLinkID     string    `json:"order_link_id"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
+	StopPx          float64   `json:"stop_px"`
+	StopOrderID     string    `json:"stop_order_id"`
+}
+
+type GetStopOrdersResultData struct {
+	CurrentPage int         `json:"current_page"`
+	LastPage    int         `json:"last_page"`
+	Data        []StopOrder `json:"data"`
+}
+
+type GetStopOrdersResult struct {
+	RetCode          int                     `json:"ret_code"`
+	RetMsg           string                  `json:"ret_msg"`
+	ExtCode          string                  `json:"ext_code"`
+	Result           GetStopOrdersResultData `json:"result"`
+	ExtInfo          interface{}             `json:"ext_info"`
+	TimeNow          string                  `json:"time_now"`
+	RateLimitStatus  int                     `json:"rate_limit_status"`
+	RateLimitResetMs int64                   `json:"rate_limit_reset_ms"`
+	RateLimit        int                     `json:"rate_limit"`
 }

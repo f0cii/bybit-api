@@ -243,16 +243,31 @@ func TestByBit_GetOrder(t *testing.T) {
 func TestByBit_GetStopOrders(t *testing.T) {
 	b := newByBit()
 	symbol := "BTCUSD"
-	orders, err := b.GetStopOrders("", "", "", "", 0, 10, symbol)
+	// Untriggered: 等待市价触发条件单; Triggered: 市价已触发条件单; Cancelled: 取消; Active: 条件单触发成功且下单成功; Rejected: 条件触发成功但下单失败
+	status := "Untriggered,Triggered,Active"
+	result, err := b.GetStopOrders("", "", status, "", 0, 10, symbol)
 	assert.Nil(t, err)
 	//t.Logf("%#v", orders)
-	for _, order := range orders {
-		if order.ExtFields != nil {
-			t.Logf("%#v %v", order, *order.ExtFields)
-		} else {
-			t.Logf("%#v", order)
-		}
+	for _, order := range result.Result.Data {
+		//if order.ExtFields != nil {
+		//	t.Logf("%#v %v", order, *order.ExtFields)
+		//} else {
+		t.Logf("CreatedAt: %v %#v", order.CreatedAt.Local(), order)
+		//}
 	}
+}
+
+func TestByBit_GetStopOrders2(t *testing.T) {
+	b := newByBit()
+	symbol := "BTCUSD"
+	//stopOrderID := "8a84cd9b-a3d4-4354-b2d7-e3b805369b77"
+	stopOrderID := "ccdcbdae-2eb8-4b8f-92de-32cc5ee18de4"
+	order, err := b.GetOrderByID(stopOrderID, "", symbol)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Logf("%#v", order)
 }
 
 func TestByBit_CancelOrder(t *testing.T) {
@@ -283,6 +298,14 @@ func TestByBit_CancelStopOrder(t *testing.T) {
 	order, err := b.CancelStopOrder(orderID, symbol)
 	assert.Nil(t, err)
 	t.Logf("%#v", order)
+}
+
+func TestByBit_CancelAllStopOrders(t *testing.T) {
+	b := newByBit()
+	symbol := "BTCUSD"
+	orders, err := b.CancelAllStopOrders(symbol)
+	assert.Nil(t, err)
+	t.Logf("%#v", orders)
 }
 
 func TestByBit_GetLeverages(t *testing.T) {

@@ -221,8 +221,7 @@ func (b *ByBit) getOrders(orderID string, orderLinkID string, sort string, order
 // stopOrderStatus 条件单状态: Untriggered: 等待市价触发条件单; Triggered: 市价已触发条件单; Cancelled: 取消; Active: 条件单触发成功且下单成功; Rejected: 条件触发成功但下单失败
 // limit: 一页数量，默认一页展示20条数据;最大支持50条每页
 func (b *ByBit) GetStopOrders(orderID string, orderLinkID string, stopOrderStatus string, order string,
-	page int, limit int, symbol string) (result []Order, err error) {
-	var cResult OrderListResult
+	page int, limit int, symbol string) (result GetStopOrdersResult, err error) {
 
 	if limit == 0 {
 		limit = 20
@@ -245,16 +244,15 @@ func (b *ByBit) GetStopOrders(orderID string, orderLinkID string, stopOrderStatu
 	params["page"] = page
 	params["limit"] = limit
 	var resp []byte
-	resp, err = b.SignedRequest(http.MethodGet, "open-api/stop-order/list", params, &cResult)
+	resp, err = b.SignedRequest(http.MethodGet, "open-api/stop-order/list", params, &result)
 	if err != nil {
 		return
 	}
-	if cResult.RetCode != 0 {
-		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
+	if result.RetCode != 0 {
+		err = fmt.Errorf("%v body: [%v]", result.RetMsg, string(resp))
 		return
 	}
 
-	result = cResult.Result.Data
 	return
 }
 
@@ -377,6 +375,26 @@ func (b *ByBit) CancelStopOrder(orderID string, symbol string) (result Order, er
 	params["stop_order_id"] = orderID
 	var resp []byte
 	resp, err = b.SignedRequest(http.MethodPost, "open-api/stop-order/cancel", params, &cResult)
+	if err != nil {
+		return
+	}
+	if cResult.RetCode != 0 {
+		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
+		return
+	}
+
+	result = cResult.Result
+	return
+}
+
+// CancelAllStopOrders 撤消全部条件委托单
+// symbol:
+func (b *ByBit) CancelAllStopOrders(symbol string) (result []StopOrderV2, err error) {
+	var cResult CancelStopOrdersV2Result
+	params := map[string]interface{}{}
+	params["symbol"] = symbol
+	var resp []byte
+	resp, err = b.SignedRequest(http.MethodPost, "v2/private/stop-order/cancelAll", params, &cResult)
 	if err != nil {
 		return
 	}
