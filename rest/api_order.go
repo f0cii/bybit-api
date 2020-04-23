@@ -126,7 +126,9 @@ func (b *ByBit) CreateStopOrder(side string, orderType string, price float64, ba
 	params["symbol"] = symbol
 	params["order_type"] = orderType
 	params["qty"] = qty
-	params["price"] = price
+	if price > 0 {
+		params["price"] = price
+	}
 	params["base_price"] = basePrice
 	params["stop_px"] = stopPx
 	params["time_in_force"] = timeInForce
