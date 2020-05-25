@@ -12,7 +12,8 @@ import (
 
 func newByBit() *ByBit {
 	//baseURL := "https://api.bybit.com/"
-	baseURL := "https://api-testnet.bybit.com/"
+	//baseURL := "https://api-testnet.bybit.com/"
+	baseURL := "https://api.bytick.com/"
 	apiKey := "6IASD6KDBdunn5qLpT"
 	secretKey := "nXjZMUiB3aMiPaQ9EUKYFloYNd0zM39RjRWF"
 	b := New(nil, baseURL, apiKey, secretKey, true)
@@ -49,6 +50,22 @@ func TestByBit_SetCorrectServerTime(t *testing.T) {
 func TestByBit_GetOrderBook(t *testing.T) {
 	b := newByBit()
 	ob, err := b.GetOrderBook("BTCUSD")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	for _, v := range ob.Asks {
+		t.Logf("Ask: %#v", v)
+	}
+	for _, v := range ob.Bids {
+		t.Logf("Bid: %#v", v)
+	}
+	t.Logf("%v", ob.Time)
+}
+
+func TestByBit_GetOrderBook2(t *testing.T) {
+	b := newByBit()
+	ob, err := b.GetOrderBook("BTCUSDT")
 	if err != nil {
 		t.Error(err)
 		return
