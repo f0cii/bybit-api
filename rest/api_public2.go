@@ -1,6 +1,8 @@
 package rest
 
-import "net/http"
+import (
+	"net/http"
+)
 
 // GetKLine2 (USDT永续)
 // https://bybit-exchange.github.io/docs/zh-cn/linear/#t-querykline

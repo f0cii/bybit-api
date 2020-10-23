@@ -25,6 +25,7 @@ func (b *ByBit) GetServerTime() (timeNow int64, err error) {
 }
 
 // GetOrderBook Get the orderbook
+// 正反向合约通用
 func (b *ByBit) GetOrderBook(symbol string) (result OrderBook, err error) {
 	var ret GetOrderBookResult
 	params := map[string]interface{}{}

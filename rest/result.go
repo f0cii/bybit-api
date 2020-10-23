@@ -240,7 +240,7 @@ type OrderListResult struct {
 // Order ...
 type Order struct {
 	OrderID string `json:"order_id"`
-	//StopOrderID     string       `json:"stop_order_id"`
+	StopOrderID     string       `json:"stop_order_id"`
 	UserID      int     `json:"user_id"`
 	Symbol      string  `json:"symbol"`
 	Side        string  `json:"side"`
