@@ -77,12 +77,12 @@ type Ticker struct {
 	Price1HPcnt          float64   `json:"price_1h_pcnt,string"`
 	MarkPrice            float64   `json:"mark_price,string"`
 	IndexPrice           float64   `json:"index_price,string"`
-	OpenInterest         int       `json:"open_interest"`
+	OpenInterest         float64   `json:"open_interest"`
 	OpenValue            float64   `json:"open_value,string"`
 	TotalTurnover        float64   `json:"total_turnover,string"`
 	Turnover24H          float64   `json:"turnover_24h,string"`
-	TotalVolume          int64     `json:"total_volume"`
-	Volume24H            int64     `json:"volume_24h"`
+	TotalVolume          float64   `json:"total_volume"`
+	Volume24H            float64   `json:"volume_24h"`
 	FundingRate          float64   `json:"funding_rate,string"`
 	PredictedFundingRate float64   `json:"predicted_funding_rate,string"`
 	NextFundingTime      time.Time `json:"next_funding_time"`
@@ -204,6 +204,10 @@ type OrderLite struct {
 	OrderID string `json:"order_id"`
 }
 
+type StopOrderLite struct {
+	StopOrderID string `json:"stop_order_id"`
+}
+
 type ReplaceOrderResult struct {
 	RetCode         int       `json:"ret_code"`
 	RetMsg          string    `json:"ret_msg"`
@@ -211,6 +215,15 @@ type ReplaceOrderResult struct {
 	Result          OrderLite `json:"result"`
 	TimeNow         string    `json:"time_now"`
 	RateLimitStatus int       `json:"rate_limit_status"`
+}
+
+type ReplaceStopOrderResult struct {
+	RetCode         int           `json:"ret_code"`
+	RetMsg          string        `json:"ret_msg"`
+	ExtCode         string        `json:"ext_code"`
+	Result          StopOrderLite `json:"result"`
+	TimeNow         string        `json:"time_now"`
+	RateLimitStatus int           `json:"rate_limit_status"`
 }
 
 type CancelOrderResult struct {
@@ -239,35 +252,35 @@ type OrderListResult struct {
 
 // Order ...
 type Order struct {
-	OrderID string `json:"order_id"`
+	OrderID         string       `json:"order_id"`
 	StopOrderID     string       `json:"stop_order_id"`
-	UserID      int     `json:"user_id"`
-	Symbol      string  `json:"symbol"`
-	Side        string  `json:"side"`
-	OrderType   string  `json:"order_type"`
-	Price       float64 `json:"price"`
-	Qty         float64 `json:"qty"`
-	TimeInForce string  `json:"time_in_force"`
-	//StopOrderType   string       `json:"stop_order_type,omitempty"`
-	//StopPx          sjson.Number `json:"stop_px,omitempty"`
-	OrderStatus string `json:"order_status"`
-	//StopOrderStatus string       `json:"stop_order_status"`
-	LastExecTime  string     `json:"last_exec_time"`
-	LastExecPrice float64    `json:"last_exec_price"`
-	LeavesQty     float64    `json:"leaves_qty"`
-	CumExecQty    float64    `json:"cum_exec_qty"`
-	CumExecValue  float64    `json:"cum_exec_value"`
-	CumExecFee    float64    `json:"cum_exec_fee"`
-	RejectReason  string     `json:"reject_reason"`
-	OrderLinkID   string     `json:"order_link_id"`
-	CreatedAt     time.Time  `json:"created_at"`
-	UpdatedAt     time.Time  `json:"updated_at"`
-	ExtFields     *ExtFields `json:"ext_fields,omitempty"`
+	UserID          int          `json:"user_id"`
+	Symbol          string       `json:"symbol"`
+	Side            string       `json:"side"`
+	OrderType       string       `json:"order_type"`
+	Price           sjson.Number `json:"price"`
+	Qty             float64      `json:"qty"`
+	TimeInForce     string       `json:"time_in_force"`
+	StopOrderType   string       `json:"stop_order_type,omitempty"`
+	StopPx          sjson.Number `json:"stop_px,omitempty"`
+	OrderStatus     string       `json:"order_status"`
+	StopOrderStatus string       `json:"stop_order_status"`
+	LastExecTime    sjson.Number `json:"last_exec_time"`
+	LastExecPrice   sjson.Number `json:"last_exec_price"`
+	LeavesQty       float64      `json:"leaves_qty"`
+	CumExecQty      float64      `json:"cum_exec_qty"`
+	CumExecValue    sjson.Number `json:"cum_exec_value"`
+	CumExecFee      sjson.Number `json:"cum_exec_fee"`
+	RejectReason    string       `json:"reject_reason"`
+	OrderLinkID     string       `json:"order_link_id"`
+	CreatedAt       time.Time    `json:"created_at"`
+	UpdatedAt       time.Time    `json:"updated_at"`
+	ExtFields       *ExtFields   `json:"ext_fields,omitempty"`
 }
 
 type ExtFields struct {
-	ReduceOnly  bool   `json:"reduce_only"`
-	OpFrom      string `json:"op_from"`
+	ReduceOnly bool `json:"reduce_only"`
+	//OpFrom      sjson.Number `json:"op_from"`
 	Remark      string `json:"remark"`
 	OReqNum     int64  `json:"o_req_num"`
 	XreqType    string `json:"xreq_type"`
@@ -295,7 +308,7 @@ func (e *ExtFields) UnmarshalJSON(b []byte) error {
 	o := InExtFields{}
 	if err := json.Unmarshal(b, &o); err == nil {
 		e.ReduceOnly = o.ReduceOnly
-		e.OpFrom = o.OpFrom
+		//e.OpFrom = o.OpFrom
 		e.Remark = o.Remark
 		e.OReqNum = o.OReqNum
 		e.XreqType = o.XreqType

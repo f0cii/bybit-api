@@ -256,6 +256,34 @@ func (b *ByBit) GetStopOrders(orderID string, orderLinkID string, stopOrderStatu
 	return
 }
 
+// ReplaceStopOrder
+func (b *ByBit) ReplaceStopOrder(symbol string, orderID string, qty int, price float64, triggerPrice float64) (result Order, err error) {
+	var cResult ReplaceStopOrderResult
+	params := map[string]interface{}{}
+	params["stop_order_id"] = orderID
+	params["symbol"] = symbol
+	if qty > 0 {
+		params["p_r_qty"] = qty
+	}
+	if price > 0 {
+		params["p_r_price"] = price
+	}
+	if triggerPrice > 0 {
+		params["p_r_trigger_price"] = triggerPrice
+	}
+	var resp []byte
+	resp, err = b.SignedRequest(http.MethodPost, "open-api/stop-order/replace", params, &cResult)
+	if err != nil {
+		return
+	}
+	if cResult.RetCode != 0 {
+		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
+		return
+	}
+	result.StopOrderID = cResult.Result.StopOrderID
+	return
+}
+
 // GetOrderByID
 func (b *ByBit) GetOrderByID(orderID string, orderLinkID string, symbol string) (result OrderV2, err error) {
 	var cResult QueryOrderResult
