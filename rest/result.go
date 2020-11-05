@@ -275,12 +275,12 @@ type Order struct {
 	OrderLinkID     string       `json:"order_link_id"`
 	CreatedAt       time.Time    `json:"created_at"`
 	UpdatedAt       time.Time    `json:"updated_at"`
-	ExtFields       *ExtFields   `json:"ext_fields,omitempty"`
+	//ExtFields       *ExtFields   `json:"ext_fields,omitempty"`
 }
 
 type ExtFields struct {
-	ReduceOnly bool `json:"reduce_only"`
-	//OpFrom      sjson.Number `json:"op_from"`
+	ReduceOnly  bool   `json:"reduce_only"`
+	OpFrom      string `json:"op_from"`
 	Remark      string `json:"remark"`
 	OReqNum     int64  `json:"o_req_num"`
 	XreqType    string `json:"xreq_type"`
@@ -308,7 +308,7 @@ func (e *ExtFields) UnmarshalJSON(b []byte) error {
 	o := InExtFields{}
 	if err := json.Unmarshal(b, &o); err == nil {
 		e.ReduceOnly = o.ReduceOnly
-		//e.OpFrom = o.OpFrom
+		e.OpFrom = o.OpFrom
 		e.Remark = o.Remark
 		e.OReqNum = o.OReqNum
 		e.XreqType = o.XreqType
