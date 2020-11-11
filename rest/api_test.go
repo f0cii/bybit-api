@@ -257,10 +257,10 @@ func TestByBit_GetStopOrders(t *testing.T) {
 	symbol := "BTCUSD"
 	// Untriggered: 等待市价触发条件单; Triggered: 市价已触发条件单; Cancelled: 取消; Active: 条件单触发成功且下单成功; Rejected: 条件触发成功但下单失败
 	status := "Untriggered,Triggered,Active"
-	result, err := b.GetStopOrders("", "", status, "", 0, 10, symbol)
+	result, err := b.GetStopOrders("", 1, 1, status, symbol)
 	assert.Nil(t, err)
 	//t.Logf("%#v", orders)
-	for _, order := range result.Result.Data {
+	for _, order := range result {
 		//if order.ExtFields != nil {
 		//	t.Logf("%#v %v", order, *order.ExtFields)
 		//} else {
