@@ -235,12 +235,7 @@ func TestByBit_GetOrders(t *testing.T) {
 	assert.Nil(t, err)
 	//t.Logf("%#v", orders)
 	for _, order := range orders {
-		if order.ExtFields != nil {
-			t.Logf("%#v %v", order, *order.ExtFields)
-			t.Logf("ReduceOnly: %v", order.ExtFields.ReduceOnly)
-		} else {
-			t.Logf("%#v", order)
-		}
+		t.Logf("%#v", order)
 	}
 }
 
@@ -334,7 +329,7 @@ func TestByBit_GetLeverages(t *testing.T) {
 
 func TestByBit_SetLeverage(t *testing.T) {
 	b := newByBit()
-	b.SetLeverage(3, "BTCUSD")
+	_ = b.SetLeverage(3, "BTCUSD")
 }
 
 func TestByBit_GetPositions(t *testing.T) {
