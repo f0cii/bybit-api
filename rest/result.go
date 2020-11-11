@@ -525,22 +525,22 @@ type CancelStopOrdersV2Result struct {
 }
 
 type StopOrder struct {
-	UserID          int64     `json:"user_id"`
-	StopOrderStatus string    `json:"stop_order_status"`
-	Symbol          string    `json:"symbol"`
-	Side            string    `json:"side"`
-	OrderType       string    `json:"order_type"`
-	Price           float64   `json:"price"`
-	Qty             float64   `json:"qty"`
-	TimeInForce     string    `json:"time_in_force"`
-	StopOrderType   string    `json:"stop_order_type"`
-	TriggerBy       string    `json:"trigger_by"`
-	BasePrice       float64   `json:"base_price"`
-	OrderLinkID     string    `json:"order_link_id"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
-	StopPx          float64   `json:"stop_px"`
-	StopOrderID     string    `json:"stop_order_id"`
+	UserID          int64        `json:"user_id"`
+	StopOrderStatus string       `json:"stop_order_status"`
+	Symbol          string       `json:"symbol"`
+	Side            string       `json:"side"`
+	OrderType       string       `json:"order_type"`
+	Price           sjson.Number `json:"price"`
+	Qty             sjson.Number `json:"qty"`
+	TimeInForce     string       `json:"time_in_force"`
+	StopOrderType   string       `json:"stop_order_type"`
+	TriggerBy       string       `json:"trigger_by"`
+	BasePrice       sjson.Number `json:"base_price"`
+	OrderLinkID     string       `json:"order_link_id"`
+	CreatedAt       time.Time    `json:"created_at"`
+	UpdatedAt       time.Time    `json:"updated_at"`
+	StopPx          sjson.Number `json:"stop_px"`
+	StopOrderID     string       `json:"stop_order_id"`
 }
 
 type GetStopOrdersResultData struct {

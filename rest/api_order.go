@@ -213,15 +213,22 @@ func (b *ByBit) getOrders(orderID string, orderLinkID string, sort string, order
 	return
 }
 
-// GetStopOrders 查询条件委托单
+// GetStopOrders
+func (b *ByBit) GetStopOrders(order string, page int, limit int, stopOrderStatus string,
+	symbol string) ([]StopOrder, error) {
+	return b.getStopOrders("", "", stopOrderStatus, order, page, limit, symbol)
+}
+
+// getStopOrders 查询条件委托单
 // orderID: 条件委托单ID
 // orderLinkID: 机构自定义订单ID
 // order: 排序字段为created_at,升序降序，默认降序 (desc asc )
 // page: 页码，默认取第一页数据
 // stopOrderStatus 条件单状态: Untriggered: 等待市价触发条件单; Triggered: 市价已触发条件单; Cancelled: 取消; Active: 条件单触发成功且下单成功; Rejected: 条件触发成功但下单失败
 // limit: 一页数量，默认一页展示20条数据;最大支持50条每页
-func (b *ByBit) GetStopOrders(orderID string, orderLinkID string, stopOrderStatus string, order string,
-	page int, limit int, symbol string) (result GetStopOrdersResult, err error) {
+func (b *ByBit) getStopOrders(orderID string, orderLinkID string, stopOrderStatus string, order string,
+	page int, limit int, symbol string) (result []StopOrder, err error) {
+	var cResult GetStopOrdersResult
 
 	if limit == 0 {
 		limit = 20
@@ -244,15 +251,16 @@ func (b *ByBit) GetStopOrders(orderID string, orderLinkID string, stopOrderStatu
 	params["page"] = page
 	params["limit"] = limit
 	var resp []byte
-	resp, err = b.SignedRequest(http.MethodGet, "open-api/stop-order/list", params, &result)
+	resp, err = b.SignedRequest(http.MethodGet, "open-api/stop-order/list", params, &cResult)
 	if err != nil {
 		return
 	}
-	if result.RetCode != 0 {
-		err = fmt.Errorf("%v body: [%v]", result.RetMsg, string(resp))
+	if cResult.RetCode != 0 {
+		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
 
+	result = cResult.Result.Data
 	return
 }
 
