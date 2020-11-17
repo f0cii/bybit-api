@@ -1,15 +1,48 @@
 package rest
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 )
 
-func (b *ByBit) CreateOrderV2(side string, orderType string, price float64,
+// getOrders 查询活动委托
+func (b *ByBit) GetOrders(symbol string, orderStatus string, direction string, limit int, cursor string) (result OrderListResponseResult, err error) {
+	var cResult OrderListResponse
+
+	if limit == 0 {
+		limit = 20
+	}
+
+	params := map[string]interface{}{}
+	params["symbol"] = symbol
+	if orderStatus != "" {
+		params["order_status"] = orderStatus
+	}
+	if direction != "" {
+		params["direction"] = direction
+	}
+	params["limit"] = limit
+	if cursor != "" {
+		params["cursor"] = cursor
+	}
+	var resp []byte
+	resp, err = b.SignedRequest(http.MethodGet, "v2/private/order/list", params, &cResult)
+	if err != nil {
+		return
+	}
+	if cResult.RetCode != 0 {
+		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
+		return
+	}
+
+	result = cResult.Result
+	return
+}
+
+func (b *ByBit) CreateOrder(side string, orderType string, price float64,
 	qty int, timeInForce string, takeProfit float64, stopLoss float64, reduceOnly bool,
-	closeOnTrigger bool, orderLinkID string, symbol string) (result OrderV2, err error) {
-	var cResult CreateOrderV2Result
+	closeOnTrigger bool, orderLinkID string, symbol string) (result Order, err error) {
+	var cResult OrderResponse
 	params := map[string]interface{}{}
 	params["side"] = side
 	params["symbol"] = symbol
@@ -47,42 +80,9 @@ func (b *ByBit) CreateOrderV2(side string, orderType string, price float64,
 	return
 }
 
-// CreateOrder 创建委托单
-// symbol: 产品类型, 有效选项:BTCUSD,ETHUSD (BTCUSD ETHUSD)
-// side: 方向, 有效选项:Buy, Sell (Buy Sell)
-// orderType: Limit/Market
-// price: 委托价格, 在没有仓位时，做多的委托价格需高于市价的10%、低于1百万。如有仓位时则需优于强平价。单笔价格增减最小单位为0.5。
-// qty: 委托数量, 单笔最大1百万
-// timeInForce: 执行策略, 有效选项:GoodTillCancel,ImmediateOrCancel,FillOrKill,PostOnly
-// reduceOnly: 只减仓
-// symbol: 产品类型, 有效选项:BTCUSD,ETHUSD (BTCUSD ETHUSD)
-func (b *ByBit) CreateOrder(side string, orderType string, price float64, qty int, timeInForce string, reduceOnly bool, symbol string) (result Order, err error) {
-	var cResult CreateOrderResult
-	params := map[string]interface{}{}
-	params["side"] = side
-	params["symbol"] = symbol
-	params["order_type"] = orderType
-	params["qty"] = qty
-	params["price"] = price
-	params["time_in_force"] = timeInForce
-	if reduceOnly {
-		params["reduce_only"] = true
-	}
-	var resp []byte
-	resp, err = b.SignedRequest(http.MethodPost, "open-api/order/create", params, &cResult)
-	if err != nil {
-		return
-	}
-	if cResult.RetCode != 0 {
-		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
-		return
-	}
-	result = cResult.Result
-	return
-}
-
+// ReplaceOrder
 func (b *ByBit) ReplaceOrder(symbol string, orderID string, qty int, price float64) (result Order, err error) {
-	var cResult ReplaceOrderResult
+	var cResult OrderResponse
 	params := map[string]interface{}{}
 	params["order_id"] = orderID
 	params["symbol"] = symbol
@@ -93,7 +93,7 @@ func (b *ByBit) ReplaceOrder(symbol string, orderID string, qty int, price float
 		params["p_r_price"] = price
 	}
 	var resp []byte
-	resp, err = b.SignedRequest(http.MethodPost, "open-api/order/replace", params, &cResult)
+	resp, err = b.SignedRequest(http.MethodPost, "v2/private/order/replace", params, &cResult)
 	if err != nil {
 		return
 	}
@@ -105,268 +105,13 @@ func (b *ByBit) ReplaceOrder(symbol string, orderID string, qty int, price float
 	return
 }
 
-// CreateStopOrder 创建条件委托单
-// https://github.com/bybit-exchange/bybit-official-api-docs/blob/master/zh_cn/rest_api.md#open-apistop-ordercreatepost
-// symbol: 产品类型, 有效选项:BTCUSD,ETHUSD (BTCUSD ETHUSD)
-// side: 方向, 有效选项:Buy, Sell (Buy Sell)
-// orderType: Limit/Market
-// price: 委托价格, 在没有仓位时，做多的委托价格需高于市价的10%、低于1百万。如有仓位时则需优于强平价。单笔价格增减最小单位为0.5。
-// qty: 委托数量, 单笔最大1百万
-// basePrice: 当前市价。用于和stop_px值进行比较，确定当前条件委托是看空到stop_px时触发还是看多到stop_px触发。主要是用来标识当前条件单预期的方向
-// stopPx: 条件委托下单时市价
-// triggerBy: 触发价格类型. 默认为上一笔成交价格
-// timeInForce: 执行策略, 有效选项:GoodTillCancel,ImmediateOrCancel,FillOrKill,PostOnly
-// reduceOnly: 只减仓
-// symbol: 产品类型, 有效选项:BTCUSD,ETHUSD (BTCUSD ETHUSD)
-func (b *ByBit) CreateStopOrder(side string, orderType string, price float64, basePrice float64, stopPx float64,
-	qty int, triggerBy string, timeInForce string, reduceOnly bool, symbol string) (result Order, err error) {
-	var cResult CreateOrderResult
-	params := map[string]interface{}{}
-	params["side"] = side
-	params["symbol"] = symbol
-	params["order_type"] = orderType
-	params["qty"] = qty
-	if price > 0 {
-		params["price"] = price
-	}
-	params["base_price"] = basePrice
-	params["stop_px"] = stopPx
-	params["time_in_force"] = timeInForce
-	if reduceOnly {
-		params["reduce_only"] = true
-	}
-	if triggerBy != "" {
-		params["trigger_by"] = triggerBy
-	}
-	var resp []byte
-	resp, err = b.SignedRequest(http.MethodPost, "open-api/stop-order/create", params, &cResult)
-	if err != nil {
-		return
-	}
-	if cResult.RetCode != 0 {
-		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
-		return
-	}
-	result = cResult.Result
-	return
-}
-
-// GetOrders 查询活动委托
-// symbol
-// orderID: 订单ID
-// orderLinkID: 机构自定义订单ID
-// sort: 排序字段，默认按创建时间排序 (created_at cum_exec_qty qty last_exec_price price cum_exec_value cum_exec_fee)
-// order: 升序降序， 默认降序 (desc asc)
-// page: 页码，默认取第一页数据
-// limit: 一页数量，一页默认展示20条数据
-func (b *ByBit) GetOrders(sort string, order string, page int,
-	limit int, orderStatus string, symbol string) (result []Order, err error) {
-	return b.getOrders("", "", sort, order, page, limit, orderStatus, symbol)
-}
-
-// getOrders 查询活动委托
-// symbol
-// orderID: 订单ID
-// orderLinkID: 机构自定义订单ID
-// sort: 排序字段，默认按创建时间排序 (created_at cum_exec_qty qty last_exec_price price cum_exec_value cum_exec_fee)
-// order: 升序降序， 默认降序 (desc asc)
-// page: 页码，默认取第一页数据
-// limit: 一页数量，一页默认展示20条数据
-func (b *ByBit) getOrders(orderID string, orderLinkID string, sort string, order string, page int,
-	limit int, orderStatus string, symbol string) (result []Order, err error) {
-	var cResult OrderListResult
-
-	if limit == 0 {
-		limit = 20
-	}
-
-	params := map[string]interface{}{}
-	params["symbol"] = symbol
-	if orderID != "" {
-		params["order_id"] = orderID
-	}
-	if orderLinkID != "" {
-		params["order_link_id"] = orderLinkID
-	}
-	if sort != "" {
-		params["sort"] = sort
-	}
-	if order != "" {
-		params["order"] = order
-	}
-	params["page"] = page
-	params["limit"] = limit
-	if orderStatus != "" {
-		params["order_status"] = orderStatus
-	}
-	var resp []byte
-	resp, err = b.SignedRequest(http.MethodGet, "open-api/order/list", params, &cResult)
-	if err != nil {
-		return
-	}
-	if cResult.RetCode != 0 {
-		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
-		return
-	}
-
-	result = cResult.Result.Data
-	return
-}
-
-// GetStopOrders
-func (b *ByBit) GetStopOrders(order string, page int, limit int, stopOrderStatus string,
-	symbol string) ([]StopOrder, error) {
-	return b.getStopOrders("", "", stopOrderStatus, order, page, limit, symbol)
-}
-
-// getStopOrders 查询条件委托单
-// orderID: 条件委托单ID
-// orderLinkID: 机构自定义订单ID
-// order: 排序字段为created_at,升序降序，默认降序 (desc asc )
-// page: 页码，默认取第一页数据
-// stopOrderStatus 条件单状态: Untriggered: 等待市价触发条件单; Triggered: 市价已触发条件单; Cancelled: 取消; Active: 条件单触发成功且下单成功; Rejected: 条件触发成功但下单失败
-// limit: 一页数量，默认一页展示20条数据;最大支持50条每页
-func (b *ByBit) getStopOrders(orderID string, orderLinkID string, stopOrderStatus string, order string,
-	page int, limit int, symbol string) (result []StopOrder, err error) {
-	var cResult GetStopOrdersResult
-
-	if limit == 0 {
-		limit = 20
-	}
-
-	params := map[string]interface{}{}
-	params["symbol"] = symbol
-	if orderID != "" {
-		params["stop_order_id"] = orderID
-	}
-	if orderLinkID != "" {
-		params["order_link_id"] = orderLinkID
-	}
-	if stopOrderStatus != "" {
-		params["stop_order_status"] = stopOrderStatus
-	}
-	if order != "" {
-		params["order"] = order
-	}
-	params["page"] = page
-	params["limit"] = limit
-	var resp []byte
-	resp, err = b.SignedRequest(http.MethodGet, "open-api/stop-order/list", params, &cResult)
-	if err != nil {
-		return
-	}
-	if cResult.RetCode != 0 {
-		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
-		return
-	}
-
-	result = cResult.Result.Data
-	return
-}
-
-// ReplaceStopOrder
-func (b *ByBit) ReplaceStopOrder(symbol string, orderID string, qty int, price float64, triggerPrice float64) (result Order, err error) {
-	var cResult ReplaceStopOrderResult
-	params := map[string]interface{}{}
-	params["stop_order_id"] = orderID
-	params["symbol"] = symbol
-	if qty > 0 {
-		params["p_r_qty"] = qty
-	}
-	if price > 0 {
-		params["p_r_price"] = price
-	}
-	if triggerPrice > 0 {
-		params["p_r_trigger_price"] = triggerPrice
-	}
-	var resp []byte
-	resp, err = b.SignedRequest(http.MethodPost, "open-api/stop-order/replace", params, &cResult)
-	if err != nil {
-		return
-	}
-	if cResult.RetCode != 0 {
-		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
-		return
-	}
-	result.StopOrderID = cResult.Result.StopOrderID
-	return
-}
-
-// GetOrderByID
-func (b *ByBit) GetOrderByID(orderID string, orderLinkID string, symbol string) (result OrderV2, err error) {
-	var cResult QueryOrderResult
-
-	params := map[string]interface{}{}
-	params["symbol"] = symbol
-	if orderID != "" {
-		params["order_id"] = orderID
-	}
-	if orderLinkID != "" {
-		params["order_link_id"] = orderLinkID
-	}
-	var resp []byte
-	resp, err = b.SignedRequest(http.MethodGet, "v2/private/order", params, &cResult)
-	if err != nil {
-		return
-	}
-	if cResult.RetCode != 0 {
-		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
-		return
-	}
-
-	result = cResult.Result
-	return
-}
-
-// GetOrderByOrderLinkID ...
-func (b *ByBit) GetOrderByOrderLinkID(orderLinkID string, symbol string) (result Order, err error) {
-	var orders []Order
-	orders, err = b.getOrders("", orderLinkID, "", "", 0, 20, "", symbol)
-	if err != nil {
-		return
-	}
-	if len(orders) != 1 {
-		err = errors.New("not found")
-		return
-	}
-	result = orders[0]
-	return
-}
-
 // CancelOrder 撤销活动委托单
-// orderID: 活动委托单ID, 数据来自创建活动委托单返回的订单唯一ID
-// symbol:
 func (b *ByBit) CancelOrder(orderID string, symbol string) (result Order, err error) {
-	var cResult CancelOrderResult
-	params := map[string]interface{}{}
-	params["symbol"] = symbol
-	params["order_id"] = orderID
-	var resp []byte
-	resp, err = b.SignedRequest(http.MethodPost, "open-api/order/cancel", params, &cResult)
-	if err != nil {
-		return
-	}
-	if cResult.RetCode != 0 {
-		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
-		return
-	}
-
-	result = cResult.Result
-	return
-}
-
-// CancelOrder 撤销活动委托单
-// orderID: 活动委托单ID, 数据来自创建活动委托单返回的订单唯一ID
-// symbol:
-func (b *ByBit) CancelOrderV2(orderID string, orderLinkID string, symbol string) (result OrderV2, err error) {
-	var cResult CancelOrderV2Result
+	var cResult OrderResponse
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	if orderID != "" {
 		params["order_id"] = orderID
-	}
-	if orderLinkID != "" {
-		params["order_link_id"] = orderLinkID
 	}
 	var resp []byte
 	resp, err = b.SignedRequest(http.MethodPost, "v2/private/order/cancel", params, &cResult)
@@ -383,8 +128,8 @@ func (b *ByBit) CancelOrderV2(orderID string, orderLinkID string, symbol string)
 }
 
 // CancelAllOrder Cancel All Active Orders
-func (b *ByBit) CancelAllOrder(symbol string) (result []OrderV2, err error) {
-	var cResult CancelAllOrderV2Result
+func (b *ByBit) CancelAllOrder(symbol string) (result []Order, err error) {
+	var cResult OrderArrayResponse
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	var resp []byte
@@ -401,16 +146,28 @@ func (b *ByBit) CancelAllOrder(symbol string) (result []OrderV2, err error) {
 	return
 }
 
-// CancelStopOrder 撤销活动条件委托单
-// orderID: 活动条件委托单ID, 数据来自创建活动委托单返回的订单唯一ID
-// symbol:
-func (b *ByBit) CancelStopOrder(orderID string, symbol string) (result Order, err error) {
-	var cResult CancelOrderResult
+// getStopOrders 查询条件委托单
+func (b *ByBit) GetStopOrders(symbol string, stopOrderStatus string, direction string, limit int, cursor string) (result StopOrderListResponseResult, err error) {
+	var cResult StopOrderListResponse
+
+	if limit == 0 {
+		limit = 20
+	}
+
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
-	params["stop_order_id"] = orderID
+	if stopOrderStatus != "" {
+		params["stop_order_status"] = stopOrderStatus
+	}
+	if direction != "" {
+		params["direction"] = direction
+	}
+	params["limit"] = limit
+	if cursor != "" {
+		params["cursor"] = cursor
+	}
 	var resp []byte
-	resp, err = b.SignedRequest(http.MethodPost, "open-api/stop-order/cancel", params, &cResult)
+	resp, err = b.SignedRequest(http.MethodGet, "v2/private/stop-order/list", params, &cResult)
 	if err != nil {
 		return
 	}
@@ -423,10 +180,91 @@ func (b *ByBit) CancelStopOrder(orderID string, symbol string) (result Order, er
 	return
 }
 
+// CreateStopOrder 创建条件委托单
+func (b *ByBit) CreateStopOrder(side string, orderType string, price float64, basePrice float64, stopPx float64,
+	qty int, triggerBy string, timeInForce string, closeOnTrigger bool, symbol string) (result StopOrder, err error) {
+	var cResult StopOrderResponse
+	params := map[string]interface{}{}
+	params["side"] = side
+	params["symbol"] = symbol
+	params["order_type"] = orderType
+	params["qty"] = qty
+	if price > 0 {
+		params["price"] = price
+	}
+	params["base_price"] = basePrice
+	params["stop_px"] = stopPx
+	params["time_in_force"] = timeInForce
+	if closeOnTrigger {
+		params["close_on_trigger"] = true
+	}
+	if triggerBy != "" {
+		params["trigger_by"] = triggerBy
+	}
+	var resp []byte
+	resp, err = b.SignedRequest(http.MethodPost, "v2/private/stop-order/create", params, &cResult)
+	if err != nil {
+		return
+	}
+	if cResult.RetCode != 0 {
+		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
+		return
+	}
+	result = cResult.Result
+	return
+}
+
+// ReplaceStopOrder
+func (b *ByBit) ReplaceStopOrder(symbol string, orderID string, qty int, price float64, triggerPrice float64) (result StopOrder, err error) {
+	var cResult StopOrderResponse
+	params := map[string]interface{}{}
+	params["stop_order_id"] = orderID
+	params["symbol"] = symbol
+	if qty > 0 {
+		params["p_r_qty"] = qty
+	}
+	if price > 0 {
+		params["p_r_price"] = price
+	}
+	if triggerPrice > 0 {
+		params["p_r_trigger_price"] = triggerPrice
+	}
+	var resp []byte
+	resp, err = b.SignedRequest(http.MethodPost, "v2/private/stop-order/replace", params, &cResult)
+	if err != nil {
+		return
+	}
+	if cResult.RetCode != 0 {
+		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
+		return
+	}
+	result.StopOrderId = cResult.Result.StopOrderId
+	return
+}
+
+// CancelStopOrder 撤销活动条件委托单
+func (b *ByBit) CancelStopOrder(orderID string, symbol string) (result StopOrder, err error) {
+	var cResult StopOrderResponse
+	params := map[string]interface{}{}
+	params["symbol"] = symbol
+	params["stop_order_id"] = orderID
+	var resp []byte
+	resp, err = b.SignedRequest(http.MethodPost, "v2/private/stop-order/cancel", params, &cResult)
+	if err != nil {
+		return
+	}
+	if cResult.RetCode != 0 {
+		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
+		return
+	}
+
+	result.StopOrderId = cResult.Result.StopOrderId
+	return
+}
+
 // CancelAllStopOrders 撤消全部条件委托单
-// symbol:
-func (b *ByBit) CancelAllStopOrders(symbol string) (result []StopOrderV2, err error) {
-	var cResult CancelStopOrdersV2Result
+func (b *ByBit) CancelAllStopOrders(symbol string) (result []StopOrder, err error) {
+	var cResult StopOrderArrayResponse
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	var resp []byte

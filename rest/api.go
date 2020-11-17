@@ -74,39 +74,13 @@ func (b *ByBit) GetWalletBalance(coin string) (result Balance, err error) {
 	return
 }
 
-// GetLeverages 获取用户杠杆
-func (b *ByBit) GetLeverages() (result map[string]LeverageItem, err error) {
-	var r GetLeverageResult
-	params := map[string]interface{}{}
-	_, err = b.SignedRequest(http.MethodGet, "user/leverage", params, &r)
-	if err != nil {
-		return
-	}
-	result = r.Result
-	return
-}
-
-// SetLeverage 设置杠杆
-func (b *ByBit) SetLeverage(leverage int, symbol string) (err error) {
-	var r BaseResult
-	params := map[string]interface{}{}
-	params["symbol"] = symbol
-	params["leverage"] = fmt.Sprintf("%v", leverage)
-	_, err = b.SignedRequest(http.MethodPost, "user/leverage", params, &r)
-	if err != nil {
-		return
-	}
-	log.Println(r)
-	return
-}
-
 // GetPositions 获取我的仓位
 func (b *ByBit) GetPositions() (result []Position, err error) {
-	var r PositionListResult
+	var r PositionArrayResponse
 
 	params := map[string]interface{}{}
 	var resp []byte
-	resp, err = b.SignedRequest(http.MethodGet, "position/list", params, &r)
+	resp, err = b.SignedRequest(http.MethodGet, "v2/private/position/list", params, &r)
 	if err != nil {
 		return
 	}
@@ -115,51 +89,13 @@ func (b *ByBit) GetPositions() (result []Position, err error) {
 		return
 	}
 
-	for _, v := range r.Result {
-		result = append(result, b.convertPositionV1(v))
-	}
-	return
-}
-
-func (b *ByBit) convertPositionV1(position PositionV1) (result Position) {
-	result.ID = position.ID
-	result.UserID = position.UserID
-	result.RiskID = position.RiskID
-	result.Symbol = position.Symbol
-	result.Size = position.Size
-	result.Side = position.Side
-	result.EntryPrice = position.EntryPrice
-	result.LiqPrice = position.LiqPrice
-	result.BustPrice = position.BustPrice
-	result.TakeProfit = position.TakeProfit
-	result.StopLoss = position.StopLoss
-	result.TrailingStop = position.TrailingStop
-	result.PositionValue = position.PositionValue
-	result.Leverage = position.Leverage
-	result.PositionStatus = position.PositionStatus
-	result.AutoAddMargin = position.AutoAddMargin
-	result.OrderMargin = position.OrderMargin
-	result.PositionMargin = position.PositionMargin
-	result.OccClosingFee = position.OccClosingFee
-	result.OccFundingFee = position.OccFundingFee
-	result.ExtFields = position.ExtFields
-	result.WalletBalance = position.WalletBalance
-	result.CumRealisedPnl = position.CumRealisedPnl
-	result.CumCommission = position.CumCommission
-	result.RealisedPnl = position.RealisedPnl
-	result.DeleverageIndicator = position.DeleverageIndicator
-	result.OcCalcData = position.OcCalcData
-	result.CrossSeq = position.CrossSeq
-	result.PositionSeq = position.PositionSeq
-	result.CreatedAt = position.CreatedAt
-	result.UpdatedAt = position.UpdatedAt
-	result.UnrealisedPnl = position.UnrealisedPnl
+	result = r.Result
 	return
 }
 
 // GetPosition 获取我的仓位
 func (b *ByBit) GetPosition(symbol string) (result Position, err error) {
-	var r GetPositionResult
+	var r PositionResponse
 
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
@@ -173,6 +109,20 @@ func (b *ByBit) GetPosition(symbol string) (result Position, err error) {
 		return
 	}
 	result = r.Result
+	return
+}
+
+// SetLeverage 设置杠杆
+func (b *ByBit) SetLeverage(leverage int, symbol string) (err error) {
+	var r BaseResult
+	params := map[string]interface{}{}
+	params["symbol"] = symbol
+	params["leverage"] = fmt.Sprintf("%v", leverage)
+	_, err = b.SignedRequest(http.MethodPost, "user/leverage/save", params, &r)
+	if err != nil {
+		return
+	}
+	log.Println(r)
 	return
 }
 
