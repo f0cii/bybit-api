@@ -200,7 +200,12 @@ type PositionResponse struct {
 
 type PositionArrayResponse struct {
 	BaseResult
-	Result []Position `json:"result"`
+	Result []PositionData `json:"result"`
+}
+
+type PositionData struct {
+	IsValid bool     `json:"is_valid"`
+	Data    Position `json:"data"`
 }
 
 type Position struct {
@@ -244,13 +249,13 @@ type Order struct {
 	Side          string       `json:"side"`
 	OrderType     string       `json:"order_type"`
 	Price         sjson.Number `json:"price"`
-	Qty           float64      `json:"qty"`
+	Qty           sjson.Number `json:"qty"`
 	TimeInForce   string       `json:"time_in_force"`
 	OrderStatus   string       `json:"order_status"`
 	LastExecTime  sjson.Number `json:"last_exec_time"`
 	LastExecPrice sjson.Number `json:"last_exec_price"`
-	LeavesQty     float64      `json:"leaves_qty"`
-	CumExecQty    float64      `json:"cum_exec_qty"`
+	LeavesQty     sjson.Number `json:"leaves_qty"`
+	CumExecQty    sjson.Number `json:"cum_exec_qty"`
 	CumExecValue  sjson.Number `json:"cum_exec_value"`
 	CumExecFee    sjson.Number `json:"cum_exec_fee"`
 	RejectReason  string       `json:"reject_reason"`
@@ -280,23 +285,23 @@ type OrderArrayResponse struct {
 }
 
 type StopOrder struct {
-	StopOrderId       string       `json:"StopOrderId"`
+	StopOrderId       string       `json:"stop_order_id"`
 	UserID            int64        `json:"user_id"`
 	Symbol            string       `json:"symbol"`
 	Side              string       `json:"side"`
 	OrderType         string       `json:"order_type"`
 	Price             sjson.Number `json:"price"`
-	Qty               float64      `json:"qty"`
+	Qty               sjson.Number `json:"qty"`
 	TimeInForce       string       `json:"time_in_force"`
 	CreateType        string       `json:"create_type"`
 	CancelType        string       `json:"cancel_type"`
 	OrderStatus       string       `json:"order_status"`
-	LeavesQty         float64      `json:"leaves_qty"`
+	LeavesQty         sjson.Number `json:"leaves_qty"`
 	LeavesValue       string       `json:"leaves_value"`
 	CreatedAt         time.Time    `json:"created_at"`
 	UpdatedAt         time.Time    `json:"updated_at"`
 	CrossStatus       string       `json:"cross_status"`
-	CrossSeq          float64      `json:"cross_seq"`
+	CrossSeq          sjson.Number `json:"cross_seq"`
 	StopOrderType     string       `json:"stop_order_type"`
 	TriggerBy         string       `json:"trigger_by"`
 	BasePrice         sjson.Number `json:"base_price"`

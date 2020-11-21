@@ -75,7 +75,7 @@ func (b *ByBit) GetWalletBalance(coin string) (result Balance, err error) {
 }
 
 // GetPositions 获取我的仓位
-func (b *ByBit) GetPositions() (result []Position, err error) {
+func (b *ByBit) GetPositions() (result []PositionData, err error) {
 	var r PositionArrayResponse
 
 	params := map[string]interface{}{}
