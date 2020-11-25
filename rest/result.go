@@ -290,6 +290,8 @@ type StopOrder struct {
 	Symbol            string       `json:"symbol"`
 	Side              string       `json:"side"`
 	OrderType         string       `json:"order_type"`
+	StopOrderType     string       `json:"stop_order_type"`
+	StopOrderStatus   string       `json:"stop_order_status"`
 	Price             sjson.Number `json:"price"`
 	Qty               sjson.Number `json:"qty"`
 	TimeInForce       string       `json:"time_in_force"`
@@ -302,7 +304,6 @@ type StopOrder struct {
 	UpdatedAt         time.Time    `json:"updated_at"`
 	CrossStatus       string       `json:"cross_status"`
 	CrossSeq          sjson.Number `json:"cross_seq"`
-	StopOrderType     string       `json:"stop_order_type"`
 	TriggerBy         string       `json:"trigger_by"`
 	BasePrice         sjson.Number `json:"base_price"`
 	ExpectedDirection string       `json:"expected_direction"`
