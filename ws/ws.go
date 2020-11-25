@@ -82,13 +82,16 @@ func New(config *Configuration) *ByBitWS {
 	b.ctx, b.cancel = context.WithCancel(context.Background())
 	b.conn = &recws.RecConn{
 		KeepAliveTimeout: 60 * time.Second,
+		NonVerbose:       true,
 	}
 	b.conn.SubscribeHandler = b.subscribeHandler
 	return b
 }
 
 func (b *ByBitWS) subscribeHandler() error {
-	log.Printf("subscribeHandler")
+	if b.cfg.DebugMode {
+		log.Printf("subscribeHandler")
+	}
 
 	b.mu.Lock()
 	defer b.mu.Unlock()
@@ -111,8 +114,10 @@ func (b *ByBitWS) subscribeHandler() error {
 }
 
 func (b *ByBitWS) closeHandler(code int, text string) error {
-	log.Printf("close handle executed code=%v text=%v",
-		code, text)
+	if b.cfg.DebugMode {
+		log.Printf("close handle executed code=%v text=%v",
+			code, text)
+	}
 	return nil
 }
 

@@ -9,7 +9,7 @@ import (
 // interval: 1 3 5 15 30 60 120 240 360 720 "D" "M" "W" "Y"
 // from: From timestamp in seconds
 // limit: Limit for data size per page, max size is 200. Default as showing 200 pieces of data per page
-func (b *ByBit) GetKLine2(symbol string, interval string, from int64, limit int) (result []OHLC2, err error) {
+func (b *ByBit) GetKLine2(symbol string, interval string, from int64, limit int) (query string, result []OHLC2, err error) {
 	var ret GetKlineResult2
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
@@ -18,7 +18,7 @@ func (b *ByBit) GetKLine2(symbol string, interval string, from int64, limit int)
 	if limit > 0 {
 		params["limit"] = limit
 	}
-	_, err = b.PublicRequest(http.MethodGet, "public/linear/kline", params, &ret)
+	query, _, err = b.PublicRequest(http.MethodGet, "public/linear/kline", params, &ret)
 	if err != nil {
 		return
 	}

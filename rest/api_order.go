@@ -6,7 +6,7 @@ import (
 )
 
 // getOrders 查询活动委托
-func (b *ByBit) GetOrders(symbol string, orderStatus string, direction string, limit int, cursor string) (result OrderListResponseResult, err error) {
+func (b *ByBit) GetOrders(symbol string, orderStatus string, direction string, limit int, cursor string) (query string, result OrderListResponseResult, err error) {
 	var cResult OrderListResponse
 
 	if limit == 0 {
@@ -26,7 +26,7 @@ func (b *ByBit) GetOrders(symbol string, orderStatus string, direction string, l
 		params["cursor"] = cursor
 	}
 	var resp []byte
-	resp, err = b.SignedRequest(http.MethodGet, "v2/private/order/list", params, &cResult)
+	query, resp, err = b.SignedRequest(http.MethodGet, "v2/private/order/list", params, &cResult)
 	if err != nil {
 		return
 	}
@@ -41,7 +41,7 @@ func (b *ByBit) GetOrders(symbol string, orderStatus string, direction string, l
 
 func (b *ByBit) CreateOrder(side string, orderType string, price float64,
 	qty int, timeInForce string, takeProfit float64, stopLoss float64, reduceOnly bool,
-	closeOnTrigger bool, orderLinkID string, symbol string) (result Order, err error) {
+	closeOnTrigger bool, orderLinkID string, symbol string) (query string, result Order, err error) {
 	var cResult OrderResponse
 	params := map[string]interface{}{}
 	params["side"] = side
@@ -68,7 +68,7 @@ func (b *ByBit) CreateOrder(side string, orderType string, price float64,
 		params["order_link_id"] = orderLinkID
 	}
 	var resp []byte
-	resp, err = b.SignedRequest(http.MethodPost, "v2/private/order/create", params, &cResult)
+	query, resp, err = b.SignedRequest(http.MethodPost, "v2/private/order/create", params, &cResult)
 	if err != nil {
 		return
 	}
@@ -81,7 +81,7 @@ func (b *ByBit) CreateOrder(side string, orderType string, price float64,
 }
 
 // ReplaceOrder
-func (b *ByBit) ReplaceOrder(symbol string, orderID string, qty int, price float64) (result Order, err error) {
+func (b *ByBit) ReplaceOrder(symbol string, orderID string, qty int, price float64) (query string, result Order, err error) {
 	var cResult OrderResponse
 	params := map[string]interface{}{}
 	params["order_id"] = orderID
@@ -93,7 +93,7 @@ func (b *ByBit) ReplaceOrder(symbol string, orderID string, qty int, price float
 		params["p_r_price"] = price
 	}
 	var resp []byte
-	resp, err = b.SignedRequest(http.MethodPost, "v2/private/order/replace", params, &cResult)
+	query, resp, err = b.SignedRequest(http.MethodPost, "v2/private/order/replace", params, &cResult)
 	if err != nil {
 		return
 	}
@@ -106,7 +106,7 @@ func (b *ByBit) ReplaceOrder(symbol string, orderID string, qty int, price float
 }
 
 // CancelOrder 撤销活动委托单
-func (b *ByBit) CancelOrder(orderID string, symbol string) (result Order, err error) {
+func (b *ByBit) CancelOrder(orderID string, symbol string) (query string, result Order, err error) {
 	var cResult OrderResponse
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
@@ -114,7 +114,7 @@ func (b *ByBit) CancelOrder(orderID string, symbol string) (result Order, err er
 		params["order_id"] = orderID
 	}
 	var resp []byte
-	resp, err = b.SignedRequest(http.MethodPost, "v2/private/order/cancel", params, &cResult)
+	query, resp, err = b.SignedRequest(http.MethodPost, "v2/private/order/cancel", params, &cResult)
 	if err != nil {
 		return
 	}
@@ -128,12 +128,12 @@ func (b *ByBit) CancelOrder(orderID string, symbol string) (result Order, err er
 }
 
 // CancelAllOrder Cancel All Active Orders
-func (b *ByBit) CancelAllOrder(symbol string) (result []Order, err error) {
+func (b *ByBit) CancelAllOrder(symbol string) (query string, result []Order, err error) {
 	var cResult OrderArrayResponse
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	var resp []byte
-	resp, err = b.SignedRequest(http.MethodPost, "v2/private/order/cancelAll", params, &cResult)
+	query, resp, err = b.SignedRequest(http.MethodPost, "v2/private/order/cancelAll", params, &cResult)
 	if err != nil {
 		return
 	}
@@ -147,7 +147,7 @@ func (b *ByBit) CancelAllOrder(symbol string) (result []Order, err error) {
 }
 
 // getStopOrders 查询条件委托单
-func (b *ByBit) GetStopOrders(symbol string, stopOrderStatus string, direction string, limit int, cursor string) (result StopOrderListResponseResult, err error) {
+func (b *ByBit) GetStopOrders(symbol string, stopOrderStatus string, direction string, limit int, cursor string) (query string, result StopOrderListResponseResult, err error) {
 	var cResult StopOrderListResponse
 
 	if limit == 0 {
@@ -167,7 +167,7 @@ func (b *ByBit) GetStopOrders(symbol string, stopOrderStatus string, direction s
 		params["cursor"] = cursor
 	}
 	var resp []byte
-	resp, err = b.SignedRequest(http.MethodGet, "v2/private/stop-order/list", params, &cResult)
+	query, resp, err = b.SignedRequest(http.MethodGet, "v2/private/stop-order/list", params, &cResult)
 	if err != nil {
 		return
 	}
@@ -182,7 +182,7 @@ func (b *ByBit) GetStopOrders(symbol string, stopOrderStatus string, direction s
 
 // CreateStopOrder 创建条件委托单
 func (b *ByBit) CreateStopOrder(side string, orderType string, price float64, basePrice float64, stopPx float64,
-	qty int, triggerBy string, timeInForce string, closeOnTrigger bool, symbol string) (result StopOrder, err error) {
+	qty int, triggerBy string, timeInForce string, closeOnTrigger bool, symbol string) (query string, result StopOrder, err error) {
 	var cResult StopOrderResponse
 	params := map[string]interface{}{}
 	params["side"] = side
@@ -202,7 +202,7 @@ func (b *ByBit) CreateStopOrder(side string, orderType string, price float64, ba
 		params["trigger_by"] = triggerBy
 	}
 	var resp []byte
-	resp, err = b.SignedRequest(http.MethodPost, "v2/private/stop-order/create", params, &cResult)
+	query, resp, err = b.SignedRequest(http.MethodPost, "v2/private/stop-order/create", params, &cResult)
 	if err != nil {
 		return
 	}
@@ -215,7 +215,7 @@ func (b *ByBit) CreateStopOrder(side string, orderType string, price float64, ba
 }
 
 // ReplaceStopOrder
-func (b *ByBit) ReplaceStopOrder(symbol string, orderID string, qty int, price float64, triggerPrice float64) (result StopOrder, err error) {
+func (b *ByBit) ReplaceStopOrder(symbol string, orderID string, qty int, price float64, triggerPrice float64) (query string, result StopOrder, err error) {
 	var cResult StopOrderResponse
 	params := map[string]interface{}{}
 	params["stop_order_id"] = orderID
@@ -230,7 +230,7 @@ func (b *ByBit) ReplaceStopOrder(symbol string, orderID string, qty int, price f
 		params["p_r_trigger_price"] = triggerPrice
 	}
 	var resp []byte
-	resp, err = b.SignedRequest(http.MethodPost, "v2/private/stop-order/replace", params, &cResult)
+	query, resp, err = b.SignedRequest(http.MethodPost, "v2/private/stop-order/replace", params, &cResult)
 	if err != nil {
 		return
 	}
@@ -243,13 +243,13 @@ func (b *ByBit) ReplaceStopOrder(symbol string, orderID string, qty int, price f
 }
 
 // CancelStopOrder 撤销活动条件委托单
-func (b *ByBit) CancelStopOrder(orderID string, symbol string) (result StopOrder, err error) {
+func (b *ByBit) CancelStopOrder(orderID string, symbol string) (query string, result StopOrder, err error) {
 	var cResult StopOrderResponse
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	params["stop_order_id"] = orderID
 	var resp []byte
-	resp, err = b.SignedRequest(http.MethodPost, "v2/private/stop-order/cancel", params, &cResult)
+	query, resp, err = b.SignedRequest(http.MethodPost, "v2/private/stop-order/cancel", params, &cResult)
 	if err != nil {
 		return
 	}
@@ -263,12 +263,12 @@ func (b *ByBit) CancelStopOrder(orderID string, symbol string) (result StopOrder
 }
 
 // CancelAllStopOrders 撤消全部条件委托单
-func (b *ByBit) CancelAllStopOrders(symbol string) (result []StopOrder, err error) {
+func (b *ByBit) CancelAllStopOrders(symbol string) (query string, result []StopOrder, err error) {
 	var cResult StopOrderArrayResponse
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	var resp []byte
-	resp, err = b.SignedRequest(http.MethodPost, "v2/private/stop-order/cancelAll", params, &cResult)
+	query, resp, err = b.SignedRequest(http.MethodPost, "v2/private/stop-order/cancelAll", params, &cResult)
 	if err != nil {
 		return
 	}

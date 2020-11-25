@@ -41,7 +41,7 @@ func New(httpClient *http.Client, baseURL string, apiKey string, secretKey strin
 // SetCorrectServerTime 校正服务器时间
 func (b *ByBit) SetCorrectServerTime() (err error) {
 	var timeNow int64
-	timeNow, err = b.GetServerTime()
+	_, timeNow, err = b.GetServerTime()
 	if err != nil {
 		return
 	}
@@ -51,11 +51,11 @@ func (b *ByBit) SetCorrectServerTime() (err error) {
 
 // GetBalance Get Wallet Balance
 // coin: BTC,EOS,XRP,ETH,USDT
-func (b *ByBit) GetWalletBalance(coin string) (result Balance, err error) {
+func (b *ByBit) GetWalletBalance(coin string) (query string, result Balance, err error) {
 	var ret GetBalanceResult
 	params := map[string]interface{}{}
 	params["coin"] = coin
-	_, err = b.SignedRequest(http.MethodGet, "v2/private/wallet/balance", params, &ret) // v2/private/wallet/balance
+	query, _, err = b.SignedRequest(http.MethodGet, "v2/private/wallet/balance", params, &ret) // v2/private/wallet/balance
 	if err != nil {
 		return
 	}
@@ -75,12 +75,12 @@ func (b *ByBit) GetWalletBalance(coin string) (result Balance, err error) {
 }
 
 // GetPositions 获取我的仓位
-func (b *ByBit) GetPositions() (result []PositionData, err error) {
+func (b *ByBit) GetPositions() (query string, result []PositionData, err error) {
 	var r PositionArrayResponse
 
 	params := map[string]interface{}{}
 	var resp []byte
-	resp, err = b.SignedRequest(http.MethodGet, "v2/private/position/list", params, &r)
+	query, resp, err = b.SignedRequest(http.MethodGet, "v2/private/position/list", params, &r)
 	if err != nil {
 		return
 	}
@@ -94,13 +94,13 @@ func (b *ByBit) GetPositions() (result []PositionData, err error) {
 }
 
 // GetPosition 获取我的仓位
-func (b *ByBit) GetPosition(symbol string) (result Position, err error) {
+func (b *ByBit) GetPosition(symbol string) (query string, result Position, err error) {
 	var r PositionResponse
 
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	var resp []byte
-	resp, err = b.SignedRequest(http.MethodGet, "v2/private/position/list", params, &r)
+	query, resp, err = b.SignedRequest(http.MethodGet, "v2/private/position/list", params, &r)
 	if err != nil {
 		return
 	}
@@ -113,12 +113,12 @@ func (b *ByBit) GetPosition(symbol string) (result Position, err error) {
 }
 
 // SetLeverage 设置杠杆
-func (b *ByBit) SetLeverage(leverage int, symbol string) (err error) {
+func (b *ByBit) SetLeverage(leverage int, symbol string) (query string, err error) {
 	var r BaseResult
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	params["leverage"] = fmt.Sprintf("%v", leverage)
-	_, err = b.SignedRequest(http.MethodPost, "user/leverage/save", params, &r)
+	query, _, err = b.SignedRequest(http.MethodPost, "user/leverage/save", params, &r)
 	if err != nil {
 		return
 	}
@@ -126,7 +126,7 @@ func (b *ByBit) SetLeverage(leverage int, symbol string) (err error) {
 	return
 }
 
-func (b *ByBit) PublicRequest(method string, apiURL string, params map[string]interface{}, result interface{}) (resp []byte, err error) {
+func (b *ByBit) PublicRequest(method string, apiURL string, params map[string]interface{}, result interface{}) (fullURL string, resp []byte, err error) {
 	var keys []string
 	for k := range params {
 		keys = append(keys, k)
@@ -139,7 +139,7 @@ func (b *ByBit) PublicRequest(method string, apiURL string, params map[string]in
 	}
 
 	param := strings.Join(p, "&")
-	fullURL := b.baseURL + apiURL
+	fullURL = b.baseURL + apiURL
 	if param != "" {
 		fullURL += "?" + param
 	}
@@ -175,7 +175,7 @@ func (b *ByBit) PublicRequest(method string, apiURL string, params map[string]in
 	return
 }
 
-func (b *ByBit) SignedRequest(method string, apiURL string, params map[string]interface{}, result interface{}) (resp []byte, err error) {
+func (b *ByBit) SignedRequest(method string, apiURL string, params map[string]interface{}, result interface{}) (fullURL string, resp []byte, err error) {
 	timestamp := time.Now().UnixNano()/1e6 + b.serverTimeOffset
 
 	params["api_key"] = b.apiKey
@@ -196,7 +196,7 @@ func (b *ByBit) SignedRequest(method string, apiURL string, params map[string]in
 	signature := b.getSigned(param)
 	param += "&sign=" + signature
 
-	fullURL := b.baseURL + apiURL + "?" + param
+	fullURL = b.baseURL + apiURL + "?" + param
 	if b.debugMode {
 		log.Printf("SignedRequest: %v", fullURL)
 	}

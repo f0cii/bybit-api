@@ -15,7 +15,7 @@ func newByBit2() *rest.ByBit {
 
 func TestByBit_GetFunding(t *testing.T) {
 	b := newByBit2()
-	funding, e := b.GetFunding("BTCUSD", 1, 200)
+	_, funding, e := b.GetFunding("BTCUSD", 1, 200)
 	if e != nil {
 		t.Error(e)
 		return

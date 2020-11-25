@@ -8,7 +8,7 @@ import (
 func TestGetKLine2(t *testing.T) {
 	b := newByBit()
 	from := time.Now().Add(-1 * time.Hour).Unix()
-	ohlcs, err := b.GetKLine2(
+	_, ohlcs, err := b.GetKLine2(
 		"BTCUSDT",
 		"1",
 		from,
