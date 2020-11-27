@@ -286,12 +286,13 @@ type OrderArrayResponse struct {
 
 type StopOrder struct {
 	StopOrderId       string       `json:"stop_order_id"`
+	StopOrderType     string       `json:"stop_order_type"`
+	StopOrderStatus   string       `json:"stop_order_status"`
+	StopPx            sjson.Number `json:"stop_px"`
 	UserID            int64        `json:"user_id"`
 	Symbol            string       `json:"symbol"`
 	Side              string       `json:"side"`
 	OrderType         string       `json:"order_type"`
-	StopOrderType     string       `json:"stop_order_type"`
-	StopOrderStatus   string       `json:"stop_order_status"`
 	Price             sjson.Number `json:"price"`
 	Qty               sjson.Number `json:"qty"`
 	TimeInForce       string       `json:"time_in_force"`
