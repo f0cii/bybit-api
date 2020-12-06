@@ -87,6 +87,7 @@ type Ticker struct {
 	Volume24H            float64 `json:"volume_24h"`
 	FundingRate          float64 `json:"funding_rate,string"`
 	PredictedFundingRate float64 `json:"predicted_funding_rate,string"`
+	NextFundingTime      string  `json:"next_funding_time"` // string because can be empty, parse it with "2006-01-02T15:04:05Z07:00"
 	CountdownHour        int     `json:"countdown_hour"`
 }
 
