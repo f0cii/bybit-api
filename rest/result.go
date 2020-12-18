@@ -209,9 +209,9 @@ type PositionData struct {
 }
 
 type Position struct {
-	ID                  int       `json:"id"`
-	UserID              int       `json:"user_id"`
-	RiskID              int       `json:"risk_id"`
+	Id                  int       `json:"id"`
+	UserId              int       `json:"user_id"`
+	RiskId              int       `json:"risk_id"`
 	Symbol              string    `json:"symbol"`
 	Size                float64   `json:"size"`
 	Side                string    `json:"side"`
@@ -243,8 +243,8 @@ type Position struct {
 }
 
 type Order struct {
-	UserID        int          `json:"user_id"`
-	OrderID       string       `json:"order_id"`
+	UserId        int          `json:"user_id"`
+	OrderId       string       `json:"order_id"`
 	Symbol        string       `json:"symbol"`
 	Side          string       `json:"side"`
 	OrderType     string       `json:"order_type"`
@@ -285,20 +285,21 @@ type OrderArrayResponse struct {
 }
 
 type StopOrder struct {
+	OrderId           string       `json:"order_id"`
+	OrderType         string       `json:"order_type"`
+	OrderStatus       string       `json:"order_status"`
 	StopOrderId       string       `json:"stop_order_id"`
 	StopOrderType     string       `json:"stop_order_type"`
 	StopOrderStatus   string       `json:"stop_order_status"`
 	StopPx            sjson.Number `json:"stop_px"`
-	UserID            int64        `json:"user_id"`
+	UserId            int64        `json:"user_id"`
 	Symbol            string       `json:"symbol"`
 	Side              string       `json:"side"`
-	OrderType         string       `json:"order_type"`
 	Price             sjson.Number `json:"price"`
 	Qty               sjson.Number `json:"qty"`
 	TimeInForce       string       `json:"time_in_force"`
 	CreateType        string       `json:"create_type"`
 	CancelType        string       `json:"cancel_type"`
-	OrderStatus       string       `json:"order_status"`
 	LeavesQty         sjson.Number `json:"leaves_qty"`
 	LeavesValue       string       `json:"leaves_value"`
 	CreatedAt         time.Time    `json:"created_at"`

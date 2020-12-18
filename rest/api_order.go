@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-// getOrders 查询活动委托
+// getOrders, async so they are not real-time
 func (b *ByBit) GetOrders(symbol string, orderStatus string, direction string, limit int, cursor string) (query string, result OrderListResponseResult, err error) {
 	var cResult OrderListResponse
 
@@ -36,6 +36,26 @@ func (b *ByBit) GetOrders(symbol string, orderStatus string, direction string, l
 	}
 
 	result = cResult.Result
+	return
+}
+
+// getActiveOrders
+func (b *ByBit) GetActiveOrders(symbol string) (query string, result OrderArrayResponse, err error) {
+	var cResult OrderArrayResponse
+
+	params := map[string]interface{}{}
+	params["symbol"] = symbol
+	var resp []byte
+	query, resp, err = b.SignedRequest(http.MethodGet, "v2/private/order", params, &cResult)
+	if err != nil {
+		return
+	}
+	if cResult.RetCode != 0 {
+		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
+		return
+	}
+
+	result = cResult
 	return
 }
 
@@ -101,7 +121,7 @@ func (b *ByBit) ReplaceOrder(symbol string, orderID string, qty int, price float
 		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
-	result.OrderID = cResult.Result.OrderID
+	result.OrderId = cResult.Result.OrderId
 	return
 }
 
@@ -146,7 +166,7 @@ func (b *ByBit) CancelAllOrder(symbol string) (query string, result []Order, err
 	return
 }
 
-// getStopOrders 查询条件委托单
+// getStopOrders, this are async so not updated, for time-sensitive use real-time
 func (b *ByBit) GetStopOrders(symbol string, stopOrderStatus string, direction string, limit int, cursor string) (query string, result StopOrderListResponseResult, err error) {
 	var cResult StopOrderListResponse
 
@@ -177,6 +197,26 @@ func (b *ByBit) GetStopOrders(symbol string, stopOrderStatus string, direction s
 	}
 
 	result = cResult.Result
+	return
+}
+
+// getActiveOrders, real time
+func (b *ByBit) GetActiveStopOrders(symbol string) (query string, result StopOrderArrayResponse, err error) {
+	var cResult StopOrderArrayResponse
+
+	params := map[string]interface{}{}
+	params["symbol"] = symbol
+	var resp []byte
+	query, resp, err = b.SignedRequest(http.MethodGet, "v2/private/stop-order", params, &cResult)
+	if err != nil {
+		return
+	}
+	if cResult.RetCode != 0 {
+		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
+		return
+	}
+
+	result = cResult
 	return
 }
 
