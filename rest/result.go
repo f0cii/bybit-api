@@ -66,29 +66,29 @@ type GetKlineResult struct {
 }
 
 type Ticker struct {
-	Symbol               string  `json:"symbol"`
-	BidPrice             float64 `json:"bid_price,string"`
-	AskPrice             float64 `json:"ask_price,string"`
-	LastPrice            float64 `json:"last_price,string"`
-	LastTickDirection    string  `json:"last_tick_direction"`
-	PrevPrice24H         float64 `json:"prev_price_24h,string"`
-	Price24HPcnt         float64 `json:"price_24h_pcnt,string"`
-	HighPrice24H         float64 `json:"high_price_24h,string"`
-	LowPrice24H          float64 `json:"low_price_24h,string"`
-	PrevPrice1H          float64 `json:"prev_price_1h,string"`
-	Price1HPcnt          float64 `json:"price_1h_pcnt,string"`
-	MarkPrice            float64 `json:"mark_price,string"`
-	IndexPrice           float64 `json:"index_price,string"`
-	OpenInterest         float64 `json:"open_interest"`
-	OpenValue            float64 `json:"open_value,string"`
-	TotalTurnover        float64 `json:"total_turnover,string"`
-	Turnover24H          float64 `json:"turnover_24h,string"`
-	TotalVolume          float64 `json:"total_volume"`
-	Volume24H            float64 `json:"volume_24h"`
-	FundingRate          float64 `json:"funding_rate,string"`
-	PredictedFundingRate float64 `json:"predicted_funding_rate,string"`
-	NextFundingTime      string  `json:"next_funding_time"` // string because can be empty, parse it with "2006-01-02T15:04:05Z07:00"
-	CountdownHour        int     `json:"countdown_hour"`
+	Symbol               string       `json:"symbol"`
+	BidPrice             sjson.Number `json:"bid_price,string"`
+	AskPrice             sjson.Number `json:"ask_price,string"`
+	LastPrice            float64      `json:"last_price,string"`
+	LastTickDirection    string       `json:"last_tick_direction"`
+	PrevPrice24H         float64      `json:"prev_price_24h,string"`
+	Price24HPcnt         float64      `json:"price_24h_pcnt,string"`
+	HighPrice24H         float64      `json:"high_price_24h,string"`
+	LowPrice24H          float64      `json:"low_price_24h,string"`
+	PrevPrice1H          float64      `json:"prev_price_1h,string"`
+	Price1HPcnt          float64      `json:"price_1h_pcnt,string"`
+	MarkPrice            float64      `json:"mark_price,string"`
+	IndexPrice           float64      `json:"index_price,string"`
+	OpenInterest         float64      `json:"open_interest"`
+	OpenValue            float64      `json:"open_value,string"`
+	TotalTurnover        float64      `json:"total_turnover,string"`
+	Turnover24H          float64      `json:"turnover_24h,string"`
+	TotalVolume          float64      `json:"total_volume"`
+	Volume24H            float64      `json:"volume_24h"`
+	FundingRate          float64      `json:"funding_rate,string"`
+	PredictedFundingRate float64      `json:"predicted_funding_rate,string"`
+	NextFundingTime      string       `json:"next_funding_time"` // string because can be empty, parse it with "2006-01-02T15:04:05Z07:00"
+	CountdownHour        int          `json:"countdown_hour"`
 }
 
 type GetTickersResult struct {
@@ -346,10 +346,10 @@ type WalletFundRecord struct {
 	Coin          string       `json:"coin"`
 	WalletId      int          `json:"wallet_id"`
 	Type          string       `json:"type"`
-	Amount        string       `json:"amount"`
+	Amount        sjson.Number `json:"amount"`
 	TxId          string       `json:"tx_id"`
 	Address       string       `json:"address"`
-	WalletBalance string       `json:"wallet_balance"`
-	ExecTime      string       `json:"exec_time"`
+	WalletBalance sjson.Number `json:"wallet_balance"`
+	ExecTime      sjson.Number `json:"exec_time"`
 	CrossSeq      sjson.Number `json:"cross_seq"`
 }
