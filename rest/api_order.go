@@ -335,9 +335,7 @@ func (b *ByBit) WalletRecords(symbol string, page int, limit int) (query string,
 		params["limit"] = limit
 	}
 	var resp []byte
-	// https://api2-testnet.bybit.com/v3/private/wallet/fund/records
-	// {"ret_code":0,"ret_msg":"OK","ext_code":"","result":{"list":[{"id":"741422","coin":"BTC","type":"RealisedPNL","amountE8":"4","walletBalanceE8":"2150270","execTimeE0":"1609027214","address":"BTCUSD"}
-	query, resp, err = b.SignedRequest(http.MethodPost, "v2/private/wallet/fund/records", params, &r)
+	query, resp, err = b.SignedRequest(http.MethodGet, "open-api/wallet/fund/records", params, &r)
 	if err != nil {
 		return
 	}

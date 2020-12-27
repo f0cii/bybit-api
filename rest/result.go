@@ -341,15 +341,15 @@ type OrderListResponseArray struct {
 }
 
 type WalletFundRecord struct {
-	Id            string `json:"id"`
-	UserId        string `json:"user_id"`
-	Coin          string `json:"coin"`
-	WalletId      string `json:"wallet_id"`
-	Type          string `json:"type"`
-	Amount        string `json:"amount"`
-	TxId          string `json:"tx_id"`
-	Address       string `json:"address"`
-	WalletBalance string `json:"wallet_balance"`
-	ExecTime      string `json:"exec_time"`
-	CrossSeq      string `json:"cross_seq"`
+	Id            int          `json:"id"`
+	UserId        int          `json:"user_id"`
+	Coin          string       `json:"coin"`
+	WalletId      int          `json:"wallet_id"`
+	Type          string       `json:"type"`
+	Amount        string       `json:"amount"`
+	TxId          string       `json:"tx_id"`
+	Address       string       `json:"address"`
+	WalletBalance string       `json:"wallet_balance"`
+	ExecTime      string       `json:"exec_time"`
+	CrossSeq      sjson.Number `json:"cross_seq"`
 }
