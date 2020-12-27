@@ -320,3 +320,32 @@ func (b *ByBit) CancelAllStopOrders(symbol string) (query string, result []StopO
 	result = cResult.Result
 	return
 }
+
+// GetWalletFunds WalletRecords
+func (b *ByBit) WalletRecords(symbol string, page int, limit int) (query string, result []WalletFundRecord, err error) {
+	var r WalletFundRecordResponse
+	params := map[string]interface{}{}
+	if symbol != "" {
+		params["currency"] = symbol
+	}
+	if page > 0 {
+		params["page"] = page
+	}
+	if limit > 0 {
+		params["limit"] = limit
+	}
+	var resp []byte
+	// https://api2-testnet.bybit.com/v3/private/wallet/fund/records
+	// {"ret_code":0,"ret_msg":"OK","ext_code":"","result":{"list":[{"id":"741422","coin":"BTC","type":"RealisedPNL","amountE8":"4","walletBalanceE8":"2150270","execTimeE0":"1609027214","address":"BTCUSD"}
+	query, resp, err = b.SignedRequest(http.MethodPost, "v2/private/wallet/fund/records", params, &r)
+	if err != nil {
+		return
+	}
+	if r.RetCode != 0 {
+		err = fmt.Errorf("%v body: [%v]", r.RetMsg, string(resp))
+		return
+	}
+
+	result = r.Result.Data
+	return
+}

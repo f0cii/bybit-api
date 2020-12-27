@@ -330,3 +330,26 @@ type StopOrderArrayResponse struct {
 	BaseResult
 	Result []StopOrder `json:"result"`
 }
+
+type WalletFundRecordResponse struct {
+	BaseResult
+	Result OrderListResponseArray `json:"result"`
+}
+
+type OrderListResponseArray struct {
+	Data []WalletFundRecord `json:"data"`
+}
+
+type WalletFundRecord struct {
+	Id            string `json:"id"`
+	UserId        string `json:"user_id"`
+	Coin          string `json:"coin"`
+	WalletId      string `json:"wallet_id"`
+	Type          string `json:"type"`
+	Amount        string `json:"amount"`
+	TxId          string `json:"tx_id"`
+	Address       string `json:"address"`
+	WalletBalance string `json:"wallet_balance"`
+	ExecTime      string `json:"exec_time"`
+	CrossSeq      string `json:"cross_seq"`
+}
