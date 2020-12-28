@@ -67,8 +67,8 @@ type GetKlineResult struct {
 
 type Ticker struct {
 	Symbol               string       `json:"symbol"`
-	BidPrice             sjson.Number `json:"bid_price,string"`
-	AskPrice             sjson.Number `json:"ask_price,string"`
+	BidPrice             sjson.Number `json:"bid_price"`
+	AskPrice             sjson.Number `json:"ask_price"`
 	LastPrice            float64      `json:"last_price,string"`
 	LastTickDirection    string       `json:"last_tick_direction"`
 	PrevPrice24H         float64      `json:"prev_price_24h,string"`
