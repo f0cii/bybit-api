@@ -39,7 +39,7 @@ type FundingData struct {
 
 // https://api2.bybit.com/funding-rate/list?symbol=BTCUSD&date=&export=false&page=1&limit=20
 // To use this you will need to set b.BaseUrl to api2.bybit.com or api2-testnet.bybit.com
-func (b *ByBit) GetFunding(symbol string, page int, limit int) (query string, result []FundingData, e error) {
+func (b *ByBit) GetFunding(symbol string, page int, limit int) (query string, resp []byte, result []FundingData, e error) {
 	var ret FundingResult
 	params := map[string]interface{}{}
 	params["symbol"] = symbol

@@ -41,7 +41,7 @@ func New(httpClient *http.Client, baseURL string, apiKey string, secretKey strin
 // SetCorrectServerTime 校正服务器时间
 func (b *ByBit) SetCorrectServerTime() (err error) {
 	var timeNow int64
-	_, timeNow, err = b.GetServerTime()
+	_, _, timeNow, err = b.GetServerTime()
 	if err != nil {
 		return
 	}
@@ -51,7 +51,7 @@ func (b *ByBit) SetCorrectServerTime() (err error) {
 
 // GetBalance Get Wallet Balance
 // coin: BTC,EOS,XRP,ETH,USDT
-func (b *ByBit) GetWalletBalance(coin string) (query string, result Balance, err error) {
+func (b *ByBit) GetWalletBalance(coin string) (query string, resp []byte, result Balance, err error) {
 	var ret GetBalanceResult
 	params := map[string]interface{}{}
 	params["coin"] = coin
@@ -75,11 +75,10 @@ func (b *ByBit) GetWalletBalance(coin string) (query string, result Balance, err
 }
 
 // GetPositions 获取我的仓位
-func (b *ByBit) GetPositions() (query string, result []PositionData, err error) {
+func (b *ByBit) GetPositions() (query string, resp []byte, result []PositionData, err error) {
 	var r PositionArrayResponse
 
 	params := map[string]interface{}{}
-	var resp []byte
 	query, resp, err = b.SignedRequest(http.MethodGet, "v2/private/position/list", params, &r)
 	if err != nil {
 		return
@@ -94,12 +93,11 @@ func (b *ByBit) GetPositions() (query string, result []PositionData, err error) 
 }
 
 // GetPosition 获取我的仓位
-func (b *ByBit) GetPosition(symbol string) (query string, result Position, err error) {
+func (b *ByBit) GetPosition(symbol string) (query string, resp []byte, result Position, err error) {
 	var r PositionResponse
 
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
-	var resp []byte
 	query, resp, err = b.SignedRequest(http.MethodGet, "v2/private/position/list", params, &r)
 	if err != nil {
 		return
@@ -113,7 +111,7 @@ func (b *ByBit) GetPosition(symbol string) (query string, result Position, err e
 }
 
 // SetLeverage 设置杠杆
-func (b *ByBit) SetLeverage(leverage int, symbol string) (query string, err error) {
+func (b *ByBit) SetLeverage(leverage int, symbol string) (query string, resp []byte, err error) {
 	var r BaseResult
 	params := map[string]interface{}{}
 	params["symbol"] = symbol

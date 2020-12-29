@@ -8,7 +8,7 @@ import (
 )
 
 // GetServerTime Get server time.
-func (b *ByBit) GetServerTime() (query string, timeNow int64, err error) {
+func (b *ByBit) GetServerTime() (query string, resp []byte, timeNow int64, err error) {
 	params := map[string]interface{}{}
 	var ret BaseResult
 	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/time", params, &ret)
@@ -26,7 +26,7 @@ func (b *ByBit) GetServerTime() (query string, timeNow int64, err error) {
 
 // GetOrderBook Get the orderbook
 // 正反向合约通用
-func (b *ByBit) GetOrderBook(symbol string) (query string, result OrderBook, err error) {
+func (b *ByBit) GetOrderBook(symbol string) (query string, resp []byte, result OrderBook, err error) {
 	var ret GetOrderBookResult
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
@@ -71,7 +71,7 @@ func (b *ByBit) GetOrderBook(symbol string) (query string, result OrderBook, err
 // interval: 1 3 5 15 30 60 120 240 360 720 "D" "M" "W" "Y"
 // from: From timestamp in seconds
 // limit: Limit for data size per page, max size is 200. Default as showing 200 pieces of data per page
-func (b *ByBit) GetKLine(symbol string, interval string, from int64, limit int) (query string, result []OHLC, err error) {
+func (b *ByBit) GetKLine(symbol string, interval string, from int64, limit int) (query string, resp []byte, result []OHLC, err error) {
 	var ret GetKlineResult
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
@@ -88,7 +88,7 @@ func (b *ByBit) GetKLine(symbol string, interval string, from int64, limit int) 
 	return
 }
 
-func (b *ByBit) GetTickers() (query string, result []Ticker, err error) {
+func (b *ByBit) GetTickers() (query string, resp []byte, result []Ticker, err error) {
 	// https://api-testnet.bybit.com/v2/public/tickers
 	var ret GetTickersResult
 	params := map[string]interface{}{}
@@ -102,7 +102,7 @@ func (b *ByBit) GetTickers() (query string, result []Ticker, err error) {
 
 // from: From ID. Default: return latest data
 // limit: Number of results. Default 500; max 1000
-func (b *ByBit) GetTradingRecords(symbol string, from int64, limit int) (query string, result []TradingRecord, err error) {
+func (b *ByBit) GetTradingRecords(symbol string, from int64, limit int) (query string, resp []byte, result []TradingRecord, err error) {
 	var ret GetTradingRecordsResult
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
@@ -120,7 +120,7 @@ func (b *ByBit) GetTradingRecords(symbol string, from int64, limit int) (query s
 	return
 }
 
-func (b *ByBit) GetSymbols() (query string, result []SymbolInfo, err error) {
+func (b *ByBit) GetSymbols() (query string, resp []byte, result []SymbolInfo, err error) {
 	var ret GetSymbolsResult
 	params := map[string]interface{}{}
 	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/symbols", params, &ret)
