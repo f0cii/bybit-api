@@ -10,19 +10,22 @@ import (
 	"log"
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
 
+// Bybit
 type ByBit struct {
 	baseURL          string // https://api-testnet.bybit.com/open-api/
 	apiKey           string
 	secretKey        string
-	serverTimeOffset int64 // 时间偏差(ms)
+	serverTimeOffset int64
 	client           *http.Client
 	debugMode        bool
 }
 
+// New
 func New(httpClient *http.Client, baseURL string, apiKey string, secretKey string, debugMode bool) *ByBit {
 	if httpClient == nil {
 		httpClient = &http.Client{
@@ -38,7 +41,7 @@ func New(httpClient *http.Client, baseURL string, apiKey string, secretKey strin
 	}
 }
 
-// SetCorrectServerTime 校正服务器时间
+// SetCorrectServerTime
 func (b *ByBit) SetCorrectServerTime() (err error) {
 	var timeNow int64
 	_, _, timeNow, err = b.GetServerTime()
@@ -49,81 +52,7 @@ func (b *ByBit) SetCorrectServerTime() (err error) {
 	return
 }
 
-// GetBalance Get Wallet Balance
-// coin: BTC,EOS,XRP,ETH,USDT
-func (b *ByBit) GetWalletBalance(coin string) (query string, resp []byte, result Balance, err error) {
-	var ret GetBalanceResult
-	params := map[string]interface{}{}
-	params["coin"] = coin
-	query, _, err = b.SignedRequest(http.MethodGet, "v2/private/wallet/balance", params, &ret) // v2/private/wallet/balance
-	if err != nil {
-		return
-	}
-	switch coin {
-	case "BTC":
-		result = ret.Result.BTC
-	case "ETH":
-		result = ret.Result.ETH
-	case "EOS":
-		result = ret.Result.EOS
-	case "XRP":
-		result = ret.Result.XRP
-	case "USDT":
-		result = ret.Result.USDT
-	}
-	return
-}
-
-// GetPositions 获取我的仓位
-func (b *ByBit) GetPositions() (query string, resp []byte, result []PositionData, err error) {
-	var r PositionArrayResponse
-
-	params := map[string]interface{}{}
-	query, resp, err = b.SignedRequest(http.MethodGet, "v2/private/position/list", params, &r)
-	if err != nil {
-		return
-	}
-	if r.RetCode != 0 {
-		err = fmt.Errorf("%v body: [%v]", r.RetMsg, string(resp))
-		return
-	}
-
-	result = r.Result
-	return
-}
-
-// GetPosition 获取我的仓位
-func (b *ByBit) GetPosition(symbol string) (query string, resp []byte, result Position, err error) {
-	var r PositionResponse
-
-	params := map[string]interface{}{}
-	params["symbol"] = symbol
-	query, resp, err = b.SignedRequest(http.MethodGet, "v2/private/position/list", params, &r)
-	if err != nil {
-		return
-	}
-	if r.RetCode != 0 {
-		err = fmt.Errorf("%v body: [%v]", r.RetMsg, string(resp))
-		return
-	}
-	result = r.Result
-	return
-}
-
-// SetLeverage 设置杠杆
-func (b *ByBit) SetLeverage(leverage int, symbol string) (query string, resp []byte, err error) {
-	var r BaseResult
-	params := map[string]interface{}{}
-	params["symbol"] = symbol
-	params["leverage"] = fmt.Sprintf("%v", leverage)
-	query, _, err = b.SignedRequest(http.MethodPost, "user/leverage/save", params, &r)
-	if err != nil {
-		return
-	}
-	log.Println(r)
-	return
-}
-
+// PublicRequest
 func (b *ByBit) PublicRequest(method string, apiURL string, params map[string]interface{}, result interface{}) (fullURL string, resp []byte, err error) {
 	var keys []string
 	for k := range params {
@@ -173,6 +102,7 @@ func (b *ByBit) PublicRequest(method string, apiURL string, params map[string]in
 	return
 }
 
+// SignedRequest
 func (b *ByBit) SignedRequest(method string, apiURL string, params map[string]interface{}, result interface{}) (fullURL string, resp []byte, err error) {
 	timestamp := time.Now().UnixNano()/1e6 + b.serverTimeOffset
 
@@ -222,14 +152,126 @@ func (b *ByBit) SignedRequest(method string, apiURL string, params map[string]in
 	if b.debugMode {
 		log.Printf("SignedRequest: %v", string(resp))
 	}
-
 	err = json.Unmarshal(resp, result)
 	return
 }
 
+// getSigned
 func (b *ByBit) getSigned(param string) string {
 	sig := hmac.New(sha256.New, []byte(b.secretKey))
 	sig.Write([]byte(param))
 	signature := hex.EncodeToString(sig.Sum(nil))
 	return signature
+}
+
+// GetServerTime
+func (b *ByBit) GetServerTime() (query string, resp []byte, timeNow int64, err error) {
+	params := map[string]interface{}{}
+	var ret BaseResult
+	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/time", params, &ret)
+	if err != nil {
+		return
+	}
+	var t float64
+	t, err = strconv.ParseFloat(ret.TimeNow, 64)
+	if err != nil {
+		return
+	}
+	timeNow = int64(t * 1000)
+	return
+}
+
+// GetWalletBalance
+func (b *ByBit) GetWalletBalance(coin string) (query string, resp []byte, result Balance, err error) {
+	var ret GetBalanceResult
+	params := map[string]interface{}{}
+	params["coin"] = coin
+	query, _, err = b.SignedRequest(http.MethodGet, "v2/private/wallet/balance", params, &ret)
+	if err != nil {
+		return
+	}
+	switch coin {
+	case "BTC":
+		result = ret.Result.BTC
+	case "ETH":
+		result = ret.Result.ETH
+	case "EOS":
+		result = ret.Result.EOS
+	case "XRP":
+		result = ret.Result.XRP
+	case "USDT":
+		result = ret.Result.USDT
+	}
+	return
+}
+
+// GetPositions
+func (b *ByBit) GetPositions() (query string, resp []byte, result []PositionData, err error) {
+	var r PositionArrayResponse
+	params := map[string]interface{}{}
+	query, resp, err = b.SignedRequest(http.MethodGet, "v2/private/position/list", params, &r)
+	if err != nil {
+		return
+	}
+	if r.RetCode != 0 {
+		err = fmt.Errorf("%v body: [%v]", r.RetMsg, string(resp))
+		return
+	}
+	result = r.Result
+	return
+}
+
+// GetPosition
+func (b *ByBit) GetPosition(symbol string) (query string, resp []byte, result Position, err error) {
+	var r PositionResponse
+	params := map[string]interface{}{}
+	params["symbol"] = symbol
+	query, resp, err = b.SignedRequest(http.MethodGet, "v2/private/position/list", params, &r)
+	if err != nil {
+		return
+	}
+	if r.RetCode != 0 {
+		err = fmt.Errorf("%v body: [%v]", r.RetMsg, string(resp))
+		return
+	}
+	result = r.Result
+	return
+}
+
+// SetLeverage
+func (b *ByBit) SetLeverage(leverage int, symbol string) (query string, resp []byte, err error) {
+	var r BaseResult
+	params := map[string]interface{}{}
+	params["symbol"] = symbol
+	params["leverage"] = fmt.Sprintf("%v", leverage)
+	query, _, err = b.SignedRequest(http.MethodPost, "user/leverage/save", params, &r)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// WalletRecords
+func (b *ByBit) WalletRecords(symbol string, page int, limit int) (query string, resp []byte, result []WalletFundRecord, err error) {
+	var r WalletFundRecordResponse
+	params := map[string]interface{}{}
+	if symbol != "" {
+		params["currency"] = symbol
+	}
+	if page > 0 {
+		params["page"] = page
+	}
+	if limit > 0 {
+		params["limit"] = limit
+	}
+	query, resp, err = b.SignedRequest(http.MethodGet, "open-api/wallet/fund/records", params, &r)
+	if err != nil {
+		return
+	}
+	if r.RetCode != 0 {
+		err = fmt.Errorf("%v body: [%v]", r.RetMsg, string(resp))
+		return
+	}
+	result = r.Result.Data
+	return
 }

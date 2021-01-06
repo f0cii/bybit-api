@@ -3,9 +3,114 @@ package rest
 import (
 	"fmt"
 	"net/http"
+	"sort"
+	"strconv"
+	"time"
 )
 
-// getOrders, async so they are not real-time
+// GetOrderBook
+func (b *ByBit) GetOrderBook(symbol string) (query string, resp []byte, result OrderBook, err error) {
+	var ret GetOrderBookResult
+	params := map[string]interface{}{}
+	params["symbol"] = symbol
+	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/orderBook/L2", params, &ret)
+	if err != nil {
+		return
+	}
+
+	for _, v := range ret.Result {
+		if v.Side == "Sell" {
+			result.Asks = append(result.Asks, Item{
+				Price: v.Price,
+				Size:  v.Size,
+			})
+		} else if v.Side == "Buy" {
+			result.Bids = append(result.Bids, Item{
+				Price: v.Price,
+				Size:  v.Size,
+			})
+		}
+	}
+
+	sort.Slice(result.Asks, func(i, j int) bool {
+		return result.Asks[i].Price < result.Asks[j].Price
+	})
+
+	sort.Slice(result.Bids, func(i, j int) bool {
+		return result.Bids[i].Price > result.Bids[j].Price
+	})
+
+	var timeNow float64
+	timeNow, err = strconv.ParseFloat(ret.TimeNow, 64) // 1582011750.433202
+	if err != nil {
+		return
+	}
+	result.Time = time.Unix(0, int64(timeNow*1e9))
+	return
+}
+
+// GetKLine
+func (b *ByBit) GetKLine(symbol string, interval string, from int64, limit int) (query string, resp []byte, result []OHLC, err error) {
+	var ret GetKlineResult
+	params := map[string]interface{}{}
+	params["symbol"] = symbol
+	params["interval"] = interval
+	params["from"] = from
+	if limit > 0 {
+		params["limit"] = limit
+	}
+	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/kline/list", params, &ret)
+	if err != nil {
+		return
+	}
+	result = ret.Result
+	return
+}
+
+// GetTickers
+func (b *ByBit) GetTickers() (query string, resp []byte, result []Ticker, err error) {
+	var ret GetTickersResult
+	params := map[string]interface{}{}
+	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/tickers", params, &ret)
+	if err != nil {
+		return
+	}
+	result = ret.Result
+	return
+}
+
+// GetTradingRecords
+func (b *ByBit) GetTradingRecords(symbol string, from int64, limit int) (query string, resp []byte, result []TradingRecord, err error) {
+	var ret GetTradingRecordsResult
+	params := map[string]interface{}{}
+	params["symbol"] = symbol
+	if from > 0 {
+		params["from"] = from
+	}
+	if limit > 0 {
+		params["limit"] = limit
+	}
+	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/trading-records", params, &ret)
+	if err != nil {
+		return
+	}
+	result = ret.Result
+	return
+}
+
+// GetSymbols
+func (b *ByBit) GetSymbols() (query string, resp []byte, result []SymbolInfo, err error) {
+	var ret GetSymbolsResult
+	params := map[string]interface{}{}
+	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/symbols", params, &ret)
+	if err != nil {
+		return
+	}
+	result = ret.Result
+	return
+}
+
+// GetOrders
 func (b *ByBit) GetOrders(symbol string, orderStatus string, direction string, limit int, cursor string) (query string, resp []byte, result OrderListResponseResult, err error) {
 	var cResult OrderListResponse
 
@@ -38,7 +143,7 @@ func (b *ByBit) GetOrders(symbol string, orderStatus string, direction string, l
 	return
 }
 
-// getActiveOrders
+// GetActiveOrders
 func (b *ByBit) GetActiveOrders(symbol string) (query string, resp []byte, result OrderArrayResponse, err error) {
 	var cResult OrderArrayResponse
 
@@ -57,6 +162,7 @@ func (b *ByBit) GetActiveOrders(symbol string) (query string, resp []byte, resul
 	return
 }
 
+// CreateOrder
 func (b *ByBit) CreateOrder(side string, orderType string, price float64,
 	qty int, timeInForce string, takeProfit float64, stopLoss float64, reduceOnly bool,
 	closeOnTrigger bool, orderLinkID string, symbol string) (query string, resp []byte, result Order, err error) {
@@ -121,7 +227,7 @@ func (b *ByBit) ReplaceOrder(symbol string, orderID string, qty int, price float
 	return
 }
 
-// CancelOrder 撤销活动委托单
+// CancelOrder
 func (b *ByBit) CancelOrder(orderID string, symbol string) (query string, resp []byte, result Order, err error) {
 	var cResult OrderResponse
 	params := map[string]interface{}{}
@@ -142,7 +248,7 @@ func (b *ByBit) CancelOrder(orderID string, symbol string) (query string, resp [
 	return
 }
 
-// CancelAllOrder Cancel All Active Orders
+// CancelAllOrder
 func (b *ByBit) CancelAllOrder(symbol string) (query string, resp []byte, result []Order, err error) {
 	var cResult OrderArrayResponse
 	params := map[string]interface{}{}
@@ -160,7 +266,7 @@ func (b *ByBit) CancelAllOrder(symbol string) (query string, resp []byte, result
 	return
 }
 
-// getStopOrders, this are async so not updated, for time-sensitive use real-time
+// GetStopOrders
 func (b *ByBit) GetStopOrders(symbol string, stopOrderStatus string, direction string, limit int, cursor string) (query string, resp []byte, result StopOrderListResponseResult, err error) {
 	var cResult StopOrderListResponse
 
@@ -193,7 +299,7 @@ func (b *ByBit) GetStopOrders(symbol string, stopOrderStatus string, direction s
 	return
 }
 
-// getActiveOrders, real time
+// GetActiveStopOrders
 func (b *ByBit) GetActiveStopOrders(symbol string) (query string, resp []byte, result StopOrderArrayResponse, err error) {
 	var cResult StopOrderArrayResponse
 
@@ -212,7 +318,7 @@ func (b *ByBit) GetActiveStopOrders(symbol string) (query string, resp []byte, r
 	return
 }
 
-// CreateStopOrder 创建条件委托单
+// CreateStopOrder
 func (b *ByBit) CreateStopOrder(side string, orderType string, price float64, basePrice float64, stopPx float64,
 	qty int, triggerBy string, timeInForce string, closeOnTrigger bool, symbol string) (query string, resp []byte, result StopOrder, err error) {
 	var cResult StopOrderResponse
@@ -272,7 +378,7 @@ func (b *ByBit) ReplaceStopOrder(symbol string, orderID string, qty int, price f
 	return
 }
 
-// CancelStopOrder 撤销活动条件委托单
+// CancelStopOrder
 func (b *ByBit) CancelStopOrder(orderID string, symbol string) (query string, resp []byte, result StopOrder, err error) {
 	var cResult StopOrderResponse
 	params := map[string]interface{}{}
@@ -291,7 +397,7 @@ func (b *ByBit) CancelStopOrder(orderID string, symbol string) (query string, re
 	return
 }
 
-// CancelAllStopOrders 撤消全部条件委托单
+// CancelAllStopOrders
 func (b *ByBit) CancelAllStopOrders(symbol string) (query string, resp []byte, result []StopOrder, err error) {
 	var cResult StopOrderArrayResponse
 	params := map[string]interface{}{}
@@ -306,31 +412,5 @@ func (b *ByBit) CancelAllStopOrders(symbol string) (query string, resp []byte, r
 	}
 
 	result = cResult.Result
-	return
-}
-
-// GetWalletFunds WalletRecords
-func (b *ByBit) WalletRecords(symbol string, page int, limit int) (query string, resp []byte, result []WalletFundRecord, err error) {
-	var r WalletFundRecordResponse
-	params := map[string]interface{}{}
-	if symbol != "" {
-		params["currency"] = symbol
-	}
-	if page > 0 {
-		params["page"] = page
-	}
-	if limit > 0 {
-		params["limit"] = limit
-	}
-	query, resp, err = b.SignedRequest(http.MethodGet, "open-api/wallet/fund/records", params, &r)
-	if err != nil {
-		return
-	}
-	if r.RetCode != 0 {
-		err = fmt.Errorf("%v body: [%v]", r.RetMsg, string(resp))
-		return
-	}
-
-	result = r.Result.Data
 	return
 }

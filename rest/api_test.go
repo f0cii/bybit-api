@@ -7,7 +7,6 @@ import (
 	"time"
 )
 
-// 开发电报群:
 // https://t.me/Bybitapi
 
 func newByBit() *ByBit {
@@ -26,7 +25,7 @@ func newByBit() *ByBit {
 
 func TestByBit_GetServerTime(t *testing.T) {
 	b := newByBit()
-	_, timeNow, err := b.GetServerTime()
+	_, _, timeNow, err := b.GetServerTime()
 	if err != nil {
 		t.Error(err)
 		return
@@ -49,7 +48,7 @@ func TestByBit_SetCorrectServerTime(t *testing.T) {
 
 func TestByBit_GetOrderBook(t *testing.T) {
 	b := newByBit()
-	_, ob, err := b.GetOrderBook("BTCUSD")
+	_, _, ob, err := b.GetOrderBook("BTCUSD")
 	if err != nil {
 		t.Error(err)
 		return
@@ -65,7 +64,7 @@ func TestByBit_GetOrderBook(t *testing.T) {
 
 func TestByBit_GetOrderBook2(t *testing.T) {
 	b := newByBit()
-	_, ob, err := b.GetOrderBook("BTCUSDT")
+	_, _, ob, err := b.GetOrderBook("BTCUSDT")
 	if err != nil {
 		t.Error(err)
 		return
@@ -82,7 +81,7 @@ func TestByBit_GetOrderBook2(t *testing.T) {
 func TestByBit_GetKLine(t *testing.T) {
 	b := newByBit()
 	from := time.Now().Add(-1 * time.Hour).Unix()
-	_, ohlcs, err := b.GetKLine(
+	_, _, ohlcs, err := b.GetKLine(
 		"BTCUSD",
 		"1",
 		from,
@@ -99,7 +98,7 @@ func TestByBit_GetKLine(t *testing.T) {
 
 func TestByBit_GetTickers(t *testing.T) {
 	b := newByBit()
-	_, tickers, err := b.GetTickers()
+	_, _, tickers, err := b.GetTickers()
 	if err != nil {
 		t.Error()
 		return
@@ -111,7 +110,7 @@ func TestByBit_GetTickers(t *testing.T) {
 
 func TestByBit_GetTradingRecords(t *testing.T) {
 	b := newByBit()
-	_, records, err := b.GetTradingRecords("BTCUSD", 0, 0)
+	_, _, records, err := b.GetTradingRecords("BTCUSD", 0, 0)
 	if err != nil {
 		t.Error(err)
 		return
@@ -123,7 +122,7 @@ func TestByBit_GetTradingRecords(t *testing.T) {
 
 func TestByBit_GetSymbols(t *testing.T) {
 	b := newByBit()
-	_, symbols, err := b.GetSymbols()
+	_, _, symbols, err := b.GetSymbols()
 	if err != nil {
 		t.Error(err)
 		return
@@ -135,7 +134,7 @@ func TestByBit_GetSymbols(t *testing.T) {
 
 func TestByBit_GetWalletBalance(t *testing.T) {
 	b := newByBit()
-	_, balance, err := b.GetWalletBalance("BTC")
+	_, _, balance, err := b.GetWalletBalance("BTC")
 	if err != nil {
 		t.Error(err)
 		return
@@ -146,7 +145,7 @@ func TestByBit_GetWalletBalance(t *testing.T) {
 func TestByBit_GetOrders(t *testing.T) {
 	b := newByBit()
 	symbol := "BTCUSD"
-	_, orders, err := b.GetOrders(symbol, "", "next", 20, "")
+	_, _, orders, err := b.GetOrders(symbol, "", "next", 20, "")
 	assert.Nil(t, err)
 	//t.Logf("%#v", orders)
 	for _, order := range orders.Data {
@@ -163,7 +162,7 @@ func TestByBit_CreateOrder(t *testing.T) {
 	price := 5000.0
 	timeInForce := "GoodTillCancel"
 	// {"ret_code":0,"ret_msg":"ok","ext_code":"","result":{"user_id":103061,"symbol":"BTCUSD","side":"Buy","order_type":"Limit","price":"7000","qty":30,"time_in_force":"GoodTillCancel","order_status":"Created","ext_fields":{"cross_status":"PendingNew","xreq_type":"x_create","xreq_offset":148672558},"leaves_qty":30,"leaves_value":"0.00428571","reject_reason":"","cross_seq":-1,"created_at":"2019-07-23T08:54:54.000Z","updated_at":"2019-07-23T08:54:54.000Z","last_exec_time":"0.000000","last_exec_price":0,"order_id":"603c41e0-c9fb-450c-90b6-ea870d5b0180"},"ext_info":null,"time_now":"1563872094.895918","rate_limit_status":98}
-	_, order, err := b.CreateOrder(
+	_, _, order, err := b.CreateOrder(
 		side,
 		orderType,
 		price,
@@ -186,7 +185,7 @@ func TestByBit_CancelOrder(t *testing.T) {
 	b := newByBit()
 	orderID := "c5b96b82-6a79-4b15-a797-361fe2ca0260"
 	symbol := "BTCUSD"
-	_, order, err := b.CancelOrder(orderID, symbol)
+	_, _, order, err := b.CancelOrder(orderID, symbol)
 	assert.Nil(t, err)
 	t.Logf("%#v", order)
 }
@@ -196,7 +195,7 @@ func TestByBit_GetStopOrders(t *testing.T) {
 	symbol := "BTCUSD"
 	// Untriggered: 等待市价触发条件单; Triggered: 市价已触发条件单; Cancelled: 取消; Active: 条件单触发成功且下单成功; Rejected: 条件触发成功但下单失败
 	status := "Untriggered,Triggered,Active"
-	_, result, err := b.GetStopOrders(symbol, status, "next", 20, "")
+	_, _, result, err := b.GetStopOrders(symbol, status, "next", 20, "")
 	assert.Nil(t, err)
 	//t.Logf("%#v", orders)
 	for _, order := range result.Data {
@@ -220,7 +219,7 @@ func TestByBit_CreateStopOrder(t *testing.T) {
 	triggerBy := ""
 	timeInForce := "GoodTillCancel"
 	// {"ret_code":0,"ret_msg":"ok","ext_code":"","result":{"user_id":103061,"symbol":"BTCUSD","side":"Buy","order_type":"Limit","price":"7000","qty":30,"time_in_force":"GoodTillCancel","order_status":"Created","ext_fields":{"cross_status":"PendingNew","xreq_type":"x_create","xreq_offset":148672558},"leaves_qty":30,"leaves_value":"0.00428571","reject_reason":"","cross_seq":-1,"created_at":"2019-07-23T08:54:54.000Z","updated_at":"2019-07-23T08:54:54.000Z","last_exec_time":"0.000000","last_exec_price":0,"order_id":"603c41e0-c9fb-450c-90b6-ea870d5b0180"},"ext_info":null,"time_now":"1563872094.895918","rate_limit_status":98}
-	_, order, err := b.CreateStopOrder(side,
+	_, _, order, err := b.CreateStopOrder(side,
 		orderType, price, basePrice, stopPx, qty, triggerBy, timeInForce, true, symbol)
 	if err != nil {
 		t.Error(err)
@@ -233,7 +232,7 @@ func TestByBit_CancelStopOrder(t *testing.T) {
 	b := newByBit()
 	orderID := "c6e535a9-6900-4b64-b983-3b220f6f41f8"
 	symbol := "BTCUSD"
-	_, order, err := b.CancelStopOrder(orderID, symbol)
+	_, _, order, err := b.CancelStopOrder(orderID, symbol)
 	assert.Nil(t, err)
 	t.Logf("%#v", order)
 }
@@ -241,26 +240,26 @@ func TestByBit_CancelStopOrder(t *testing.T) {
 func TestByBit_CancelAllStopOrders(t *testing.T) {
 	b := newByBit()
 	symbol := "BTCUSD"
-	_, orders, err := b.CancelAllStopOrders(symbol)
+	_, _, orders, err := b.CancelAllStopOrders(symbol)
 	assert.Nil(t, err)
 	t.Logf("%#v", orders)
 }
 
 func TestByBit_SetLeverage(t *testing.T) {
 	b := newByBit()
-	_, _ = b.SetLeverage(3, "BTCUSD")
+	_, _, _ = b.SetLeverage(3, "BTCUSD")
 }
 
 func TestByBit_GetPositions(t *testing.T) {
 	b := newByBit()
-	_, positions, err := b.GetPositions()
+	_, _, positions, err := b.GetPositions()
 	assert.Nil(t, err)
 	t.Logf("%#v", positions)
 }
 
 func TestByBit_GetPosition(t *testing.T) {
 	b := newByBit()
-	_, position, err := b.GetPosition("BTCUSD")
+	_, _, position, err := b.GetPosition("BTCUSD")
 	assert.Nil(t, err)
 	t.Logf("%#v", position)
 }

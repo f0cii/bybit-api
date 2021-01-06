@@ -37,8 +37,10 @@ type FundingData struct {
 	Time   time.Time    `json:"time"`
 }
 
+// To use this functions will need to set b.BaseUrl to api2.bybit.com or api2-testnet.bybit.com
+
+// GetFunding
 // https://api2.bybit.com/funding-rate/list?symbol=BTCUSD&date=&export=false&page=1&limit=20
-// To use this you will need to set b.BaseUrl to api2.bybit.com or api2-testnet.bybit.com
 func (b *ByBit) GetFunding(symbol string, page int, limit int) (query string, resp []byte, result []FundingData, e error) {
 	var ret FundingResult
 	params := map[string]interface{}{}
@@ -54,4 +56,19 @@ func (b *ByBit) GetFunding(symbol string, page int, limit int) (query string, re
 	return
 }
 
-// for linear: https://api2.bybit.com/linear/funding-rate/list?symbol=BTCUSDT&date=&export=false&page=1
+// LinearGetFunding
+// https://api2.bybit.com/linear/funding-rate/list?symbol=BTCUSDT&date=&export=false&page=1
+func (b *ByBit) LinearGetFunding(symbol string, page int, limit int) (query string, resp []byte, result []FundingData, e error) {
+	var ret FundingResult
+	params := map[string]interface{}{}
+	params["symbol"] = symbol
+	params["page"] = page
+	params["limit"] = limit  // fixed limit 20
+	params["export"] = false // fixed export
+	query, _, e = b.PublicRequest(http.MethodGet, "linear/funding-rate/list", params, &ret)
+	if e != nil {
+		return
+	}
+	result = ret.Result.Data
+	return
+}
