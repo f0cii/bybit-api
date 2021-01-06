@@ -67,49 +67,6 @@ func (b *ByBit) GetKLine(symbol string, interval string, from int64, limit int) 
 	return
 }
 
-// GetTickers
-func (b *ByBit) GetTickers() (query string, resp []byte, result []Ticker, err error) {
-	var ret GetTickersResult
-	params := map[string]interface{}{}
-	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/tickers", params, &ret)
-	if err != nil {
-		return
-	}
-	result = ret.Result
-	return
-}
-
-// GetTradingRecords
-func (b *ByBit) GetTradingRecords(symbol string, from int64, limit int) (query string, resp []byte, result []TradingRecord, err error) {
-	var ret GetTradingRecordsResult
-	params := map[string]interface{}{}
-	params["symbol"] = symbol
-	if from > 0 {
-		params["from"] = from
-	}
-	if limit > 0 {
-		params["limit"] = limit
-	}
-	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/trading-records", params, &ret)
-	if err != nil {
-		return
-	}
-	result = ret.Result
-	return
-}
-
-// GetSymbols
-func (b *ByBit) GetSymbols() (query string, resp []byte, result []SymbolInfo, err error) {
-	var ret GetSymbolsResult
-	params := map[string]interface{}{}
-	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/symbols", params, &ret)
-	if err != nil {
-		return
-	}
-	result = ret.Result
-	return
-}
-
 // GetOrders
 func (b *ByBit) GetOrders(symbol string, orderStatus string, direction string, limit int, cursor string) (query string, resp []byte, result OrderListResponseResult, err error) {
 	var cResult OrderListResponse

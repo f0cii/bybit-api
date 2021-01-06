@@ -275,3 +275,46 @@ func (b *ByBit) WalletRecords(symbol string, page int, limit int) (query string,
 	result = r.Result.Data
 	return
 }
+
+// GetTickers
+func (b *ByBit) GetTickers() (query string, resp []byte, result []Ticker, err error) {
+	var ret GetTickersResult
+	params := map[string]interface{}{}
+	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/tickers", params, &ret)
+	if err != nil {
+		return
+	}
+	result = ret.Result
+	return
+}
+
+// GetTradingRecords
+func (b *ByBit) GetTradingRecords(symbol string, from int64, limit int) (query string, resp []byte, result []TradingRecord, err error) {
+	var ret GetTradingRecordsResult
+	params := map[string]interface{}{}
+	params["symbol"] = symbol
+	if from > 0 {
+		params["from"] = from
+	}
+	if limit > 0 {
+		params["limit"] = limit
+	}
+	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/trading-records", params, &ret)
+	if err != nil {
+		return
+	}
+	result = ret.Result
+	return
+}
+
+// GetSymbols
+func (b *ByBit) GetSymbols() (query string, resp []byte, result []SymbolInfo, err error) {
+	var ret GetSymbolsResult
+	params := map[string]interface{}{}
+	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/symbols", params, &ret)
+	if err != nil {
+		return
+	}
+	result = ret.Result
+	return
+}
