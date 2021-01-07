@@ -395,3 +395,46 @@ type WalletFundRecordResponse struct {
 type OrderListResponseArray struct {
 	Data []WalletFundRecord `json:"data"`
 }
+
+type Funding struct {
+	CurrentPage  int           `json:"current_page"`
+	Data         []FundingData `json:"data"`
+	FirstPageUrl string        `json:"first_page_url"`
+	From         int           `json:"from"`
+	LastPage     int           `json:"last_page"`
+	LastPageUrl  string        `json:"last_page_url"`
+	NextPageUrl  string        `json:"next_page_url"`
+	Path         string        `json:"path"`
+	PerPage      sjson.Number  `json:"per_page"`
+	PrevPageUrl  string        `json:"prev_page_url"`
+	To           int           `json:"to"`
+	Total        int           `json:"total"`
+}
+
+type FundingResult struct {
+	BaseResult
+	Result Funding `json:"result"`
+}
+
+type FundingData struct {
+	Id     int          `json:"id"`
+	Symbol string       `json:"symbol"`
+	Value  sjson.Number `json:"value"`
+	Time   time.Time    `json:"time"`
+}
+
+type IndexOHLC struct {
+	Id      int          `json:"id"`
+	Symbol  string       `json:"symbol"`
+	Open    sjson.Number `json:"open"`
+	High    sjson.Number `json:"high"`
+	Low     sjson.Number `json:"low"`
+	Close   sjson.Number `json:"close"`
+	StartAt int          `json:"start_at"`
+	Period  string       `json:"period"`
+}
+
+type IndexOHLCResult struct {
+	BaseResult
+	Result []IndexOHLC `json:"result"`
+}
