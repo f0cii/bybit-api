@@ -17,6 +17,11 @@ type BaseResult struct {
 	RateLimit        int         `json:"rate_limit"`
 }
 
+type ResultStringArrayResponse struct {
+	BaseResult
+	Result []string `json:"result"`
+}
+
 type Item struct {
 	Price float64 `json:"price,string"`
 	Size  float64 `json:"size"`
@@ -36,12 +41,8 @@ type RawItem struct {
 }
 
 type GetOrderBookResult struct {
-	RetCode int       `json:"ret_code"`
-	RetMsg  string    `json:"ret_msg"`
-	ExtCode string    `json:"ext_code"`
-	ExtInfo string    `json:"ext_info"`
-	Result  []RawItem `json:"result"`
-	TimeNow string    `json:"time_now"`
+	BaseResult
+	Result []RawItem `json:"result"`
 }
 
 type OHLC struct {
@@ -57,12 +58,31 @@ type OHLC struct {
 }
 
 type GetKlineResult struct {
-	RetCode int    `json:"ret_code"`
-	RetMsg  string `json:"ret_msg"`
-	ExtCode string `json:"ext_code"`
-	ExtInfo string `json:"ext_info"`
-	Result  []OHLC `json:"result"`
-	TimeNow string `json:"time_now"`
+	BaseResult
+	Result []OHLC `json:"result"`
+}
+
+type OpenInterest struct {
+	Symbol       string       `json:"symbol"`
+	OpenInterest sjson.Number `json:"open_interest"`
+	Timestamp    sjson.Number `json:"timestamp"`
+}
+
+type GetOpenInterestResult struct {
+	BaseResult
+	Result []OpenInterest `json:"result"`
+}
+
+type AccountRatio struct {
+	Symbol    string       `json:"symbol"`
+	BuyRatio  sjson.Number `json:"buy_ratio"`
+	SellRatio sjson.Number `json:"sell_ratio"`
+	Timestamp sjson.Number `json:"timestamp"`
+}
+
+type GetAccountRatioResult struct {
+	BaseResult
+	Result []AccountRatio `json:"result"`
 }
 
 type Ticker struct {
@@ -193,21 +213,6 @@ type GetBalanceResultData struct {
 	USDT Balance `json:"USDT"`
 }
 
-type PositionResponse struct {
-	BaseResult
-	Result Position `json:"result"`
-}
-
-type PositionArrayResponse struct {
-	BaseResult
-	Result []PositionData `json:"result"`
-}
-
-type PositionData struct {
-	IsValid bool     `json:"is_valid"`
-	Data    Position `json:"data"`
-}
-
 type Position struct {
 	Id                  int       `json:"id"`
 	UserId              int       `json:"user_id"`
@@ -242,6 +247,21 @@ type Position struct {
 	UnrealisedPnl       float64   `json:"unrealised_pnl"`
 }
 
+type PositionResponse struct {
+	BaseResult
+	Result Position `json:"result"`
+}
+
+type PositionArrayResponse struct {
+	BaseResult
+	Result []PositionData `json:"result"`
+}
+
+type PositionData struct {
+	IsValid bool     `json:"is_valid"`
+	Data    Position `json:"data"`
+}
+
 type Order struct {
 	UserId        int          `json:"user_id"`
 	OrderId       string       `json:"order_id"`
@@ -272,6 +292,17 @@ type OrderListResponse struct {
 type OrderListResponseResult struct {
 	Data   []Order `json:"data"`
 	Cursor string  `json:"cursor"`
+}
+
+type OrderListResponsePaginated struct {
+	BaseResult
+	Result OrderListResponseResultPaginated `json:"result"`
+}
+
+type OrderListResponseResultPaginated struct {
+	CurrentPage string  `json:"current_page"`
+	LastPage    string  `json:"last_page"`
+	Data        []Order `json:"data"`
 }
 
 type OrderResponse struct {
@@ -331,13 +362,15 @@ type StopOrderArrayResponse struct {
 	Result []StopOrder `json:"result"`
 }
 
-type WalletFundRecordResponse struct {
+type StopOrderListResponsePaginated struct {
 	BaseResult
-	Result OrderListResponseArray `json:"result"`
+	Result StopOrderListResponseResultPaginated `json:"result"`
 }
 
-type OrderListResponseArray struct {
-	Data []WalletFundRecord `json:"data"`
+type StopOrderListResponseResultPaginated struct {
+	CurrentPage string      `json:"current_page"`
+	LastPage    string      `json:"last_page"`
+	Data        []StopOrder `json:"data"`
 }
 
 type WalletFundRecord struct {
@@ -352,4 +385,13 @@ type WalletFundRecord struct {
 	WalletBalance sjson.Number `json:"wallet_balance"`
 	ExecTime      sjson.Number `json:"exec_time"`
 	CrossSeq      sjson.Number `json:"cross_seq"`
+}
+
+type WalletFundRecordResponse struct {
+	BaseResult
+	Result OrderListResponseArray `json:"result"`
+}
+
+type OrderListResponseArray struct {
+	Data []WalletFundRecord `json:"data"`
 }

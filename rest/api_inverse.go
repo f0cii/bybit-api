@@ -17,7 +17,6 @@ func (b *ByBit) GetOrderBook(symbol string) (query string, resp []byte, result O
 	if err != nil {
 		return
 	}
-
 	for _, v := range ret.Result {
 		if v.Side == "Sell" {
 			result.Asks = append(result.Asks, Item{
@@ -31,15 +30,12 @@ func (b *ByBit) GetOrderBook(symbol string) (query string, resp []byte, result O
 			})
 		}
 	}
-
 	sort.Slice(result.Asks, func(i, j int) bool {
 		return result.Asks[i].Price < result.Asks[j].Price
 	})
-
 	sort.Slice(result.Bids, func(i, j int) bool {
 		return result.Bids[i].Price > result.Bids[j].Price
 	})
-
 	var timeNow float64
 	timeNow, err = strconv.ParseFloat(ret.TimeNow, 64) // 1582011750.433202
 	if err != nil {
@@ -70,11 +66,9 @@ func (b *ByBit) GetKLine(symbol string, interval string, from int64, limit int) 
 // GetOrders
 func (b *ByBit) GetOrders(symbol string, orderStatus string, direction string, limit int, cursor string) (query string, resp []byte, result OrderListResponseResult, err error) {
 	var cResult OrderListResponse
-
 	if limit == 0 {
 		limit = 20
 	}
-
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	if orderStatus != "" {
@@ -95,7 +89,6 @@ func (b *ByBit) GetOrders(symbol string, orderStatus string, direction string, l
 		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
-
 	result = cResult.Result
 	return
 }
@@ -103,7 +96,6 @@ func (b *ByBit) GetOrders(symbol string, orderStatus string, direction string, l
 // GetActiveOrders
 func (b *ByBit) GetActiveOrders(symbol string) (query string, resp []byte, result OrderArrayResponse, err error) {
 	var cResult OrderArrayResponse
-
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	query, resp, err = b.SignedRequest(http.MethodGet, "v2/private/order", params, &cResult)
@@ -114,7 +106,6 @@ func (b *ByBit) GetActiveOrders(symbol string) (query string, resp []byte, resul
 		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
-
 	result = cResult
 	return
 }
@@ -200,7 +191,6 @@ func (b *ByBit) CancelOrder(orderID string, symbol string) (query string, resp [
 		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
-
 	result = cResult.Result
 	return
 }
@@ -218,7 +208,6 @@ func (b *ByBit) CancelAllOrder(symbol string) (query string, resp []byte, result
 		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
-
 	result = cResult.Result
 	return
 }
@@ -226,11 +215,9 @@ func (b *ByBit) CancelAllOrder(symbol string) (query string, resp []byte, result
 // GetStopOrders
 func (b *ByBit) GetStopOrders(symbol string, stopOrderStatus string, direction string, limit int, cursor string) (query string, resp []byte, result StopOrderListResponseResult, err error) {
 	var cResult StopOrderListResponse
-
 	if limit == 0 {
 		limit = 20
 	}
-
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	if stopOrderStatus != "" {
@@ -251,7 +238,6 @@ func (b *ByBit) GetStopOrders(symbol string, stopOrderStatus string, direction s
 		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
-
 	result = cResult.Result
 	return
 }
@@ -259,7 +245,6 @@ func (b *ByBit) GetStopOrders(symbol string, stopOrderStatus string, direction s
 // GetActiveStopOrders
 func (b *ByBit) GetActiveStopOrders(symbol string) (query string, resp []byte, result StopOrderArrayResponse, err error) {
 	var cResult StopOrderArrayResponse
-
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	query, resp, err = b.SignedRequest(http.MethodGet, "v2/private/stop-order", params, &cResult)
@@ -270,7 +255,6 @@ func (b *ByBit) GetActiveStopOrders(symbol string) (query string, resp []byte, r
 		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
-
 	result = cResult
 	return
 }
@@ -349,7 +333,6 @@ func (b *ByBit) CancelStopOrder(orderID string, symbol string) (query string, re
 		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
-
 	result.StopOrderId = cResult.Result.StopOrderId
 	return
 }
@@ -367,7 +350,6 @@ func (b *ByBit) CancelAllStopOrders(symbol string) (query string, resp []byte, r
 		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
-
 	result = cResult.Result
 	return
 }
