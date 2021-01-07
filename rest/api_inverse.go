@@ -13,7 +13,7 @@ func (b *ByBit) GetOrderBook(symbol string) (query string, resp []byte, result O
 	var ret GetOrderBookResult
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
-	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/orderBook/L2", params, &ret)
+	query, resp, err = b.PublicRequest(http.MethodGet, "v2/public/orderBook/L2", params, &ret)
 	if err != nil {
 		return
 	}
@@ -55,7 +55,7 @@ func (b *ByBit) GetKLine(symbol string, interval string, from int64, limit int) 
 	if limit > 0 {
 		params["limit"] = limit
 	}
-	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/kline/list", params, &ret)
+	query, resp, err = b.PublicRequest(http.MethodGet, "v2/public/kline/list", params, &ret)
 	if err != nil {
 		return
 	}

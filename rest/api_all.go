@@ -10,7 +10,7 @@ import (
 func (b *ByBit) GetServerTime() (query string, resp []byte, timeNow int64, err error) {
 	params := map[string]interface{}{}
 	var ret BaseResult
-	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/time", params, &ret)
+	query, resp, err = b.PublicRequest(http.MethodGet, "v2/public/time", params, &ret)
 	if err != nil {
 		return
 	}
@@ -28,7 +28,7 @@ func (b *ByBit) GetWalletBalance(coin string) (query string, resp []byte, result
 	var ret GetBalanceResult
 	params := map[string]interface{}{}
 	params["coin"] = coin
-	query, _, err = b.SignedRequest(http.MethodGet, "v2/private/wallet/balance", params, &ret)
+	query, resp, err = b.SignedRequest(http.MethodGet, "v2/private/wallet/balance", params, &ret)
 	if err != nil {
 		return
 	}
@@ -86,7 +86,7 @@ func (b *ByBit) SetLeverage(leverage int, symbol string) (query string, resp []b
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	params["leverage"] = fmt.Sprintf("%v", leverage)
-	query, _, err = b.SignedRequest(http.MethodPost, "user/leverage/save", params, &r)
+	query, resp, err = b.SignedRequest(http.MethodPost, "user/leverage/save", params, &r)
 	if err != nil {
 		return
 	}
@@ -122,7 +122,7 @@ func (b *ByBit) WalletRecords(symbol string, page int, limit int) (query string,
 func (b *ByBit) GetTickers() (query string, resp []byte, result []Ticker, err error) {
 	var ret GetTickersResult
 	params := map[string]interface{}{}
-	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/tickers", params, &ret)
+	query, resp, err = b.PublicRequest(http.MethodGet, "v2/public/tickers", params, &ret)
 	if err != nil {
 		return
 	}
@@ -141,7 +141,7 @@ func (b *ByBit) GetTradingRecords(symbol string, from int64, limit int) (query s
 	if limit > 0 {
 		params["limit"] = limit
 	}
-	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/trading-records", params, &ret)
+	query, resp, err = b.PublicRequest(http.MethodGet, "v2/public/trading-records", params, &ret)
 	if err != nil {
 		return
 	}
@@ -153,7 +153,7 @@ func (b *ByBit) GetTradingRecords(symbol string, from int64, limit int) (query s
 func (b *ByBit) GetSymbols() (query string, resp []byte, result []SymbolInfo, err error) {
 	var ret GetSymbolsResult
 	params := map[string]interface{}{}
-	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/symbols", params, &ret)
+	query, resp, err = b.PublicRequest(http.MethodGet, "v2/public/symbols", params, &ret)
 	if err != nil {
 		return
 	}
@@ -170,7 +170,7 @@ func (b *ByBit) GetOpenInterest(symbol string, period string, limit int) (query 
 	if limit > 0 {
 		params["limit"] = limit
 	}
-	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/open-interest", params, &ret)
+	query, resp, err = b.PublicRequest(http.MethodGet, "v2/public/open-interest", params, &ret)
 	if err != nil {
 		return
 	}
@@ -187,7 +187,7 @@ func (b *ByBit) GetAccountRatio(symbol string, period string, limit int) (query 
 	if limit > 0 {
 		params["limit"] = limit
 	}
-	query, _, err = b.PublicRequest(http.MethodGet, "v2/public/account-ratio", params, &ret)
+	query, resp, err = b.PublicRequest(http.MethodGet, "v2/public/account-ratio", params, &ret)
 	if err != nil {
 		return
 	}

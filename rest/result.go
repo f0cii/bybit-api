@@ -411,16 +411,16 @@ type Funding struct {
 	Total        int           `json:"total"`
 }
 
-type FundingResult struct {
-	BaseResult
-	Result Funding `json:"result"`
-}
-
 type FundingData struct {
 	Id     int          `json:"id"`
 	Symbol string       `json:"symbol"`
 	Value  sjson.Number `json:"value"`
-	Time   time.Time    `json:"time"`
+	Time   string       `json:"time"`
+}
+
+type FundingResult struct {
+	BaseResult
+	Result Funding `json:"result"`
 }
 
 type IndexOHLC struct {

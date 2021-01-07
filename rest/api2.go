@@ -15,7 +15,7 @@ func (b *ByBit) GetFunding(symbol string, page int, limit int) (query string, re
 	params["page"] = page
 	params["limit"] = limit  // fixed limit 20
 	params["export"] = false // fixed export
-	query, _, e = b.PublicRequest(http.MethodGet, "funding-rate/list", params, &ret)
+	query, resp, e = b.PublicRequest(http.MethodGet, "funding-rate/list", params, &ret)
 	if e != nil {
 		return
 	}
@@ -25,14 +25,14 @@ func (b *ByBit) GetFunding(symbol string, page int, limit int) (query string, re
 
 // GetPriceIndex
 // https://api2.bybit.com/api/price/index?symbol=BTCUSD&resolution=1&from=1605087277&to=1605173738
-func (b *ByBit) GetPriceIndex(symbol string, resolution int, from string, to string) (query string, resp []byte, result []IndexOHLC, e error) {
+func (b *ByBit) GetPriceIndex(symbol string, resolution string, from int64, to int64) (query string, resp []byte, result []IndexOHLC, e error) {
 	var ret IndexOHLCResult
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	params["resolution"] = resolution
 	params["from"] = from
 	params["to"] = to
-	query, _, e = b.PublicRequest(http.MethodGet, "api/price/index", params, &ret)
+	query, resp, e = b.PublicRequest(http.MethodGet, "api/price/index", params, &ret)
 	if e != nil {
 		return
 	}
@@ -42,14 +42,14 @@ func (b *ByBit) GetPriceIndex(symbol string, resolution int, from string, to str
 
 // GetPremiumIndex
 // https://api2.bybit.com/api/premium-index-price/index?symbol=BTCUSD&from=1605087277&resolution=1&to=1605173738
-func (b *ByBit) GetPremiumIndex(symbol string, resolution int, from string, to string) (query string, resp []byte, result []IndexOHLC, e error) {
+func (b *ByBit) GetPremiumIndex(symbol string, resolution string, from int64, to int64) (query string, resp []byte, result []IndexOHLC, e error) {
 	var ret IndexOHLCResult
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	params["resolution"] = resolution
 	params["from"] = from
 	params["to"] = to
-	query, _, e = b.PublicRequest(http.MethodGet, "api/premium-index-price/index", params, &ret)
+	query, resp, e = b.PublicRequest(http.MethodGet, "api/premium-index-price/index", params, &ret)
 	if e != nil {
 		return
 	}
@@ -66,7 +66,7 @@ func (b *ByBit) LinearGetFunding(symbol string, page int, limit int) (query stri
 	params["page"] = page
 	params["limit"] = limit  // fixed limit 20
 	params["export"] = false // fixed export
-	query, _, e = b.PublicRequest(http.MethodGet, "linear/funding-rate/list", params, &ret)
+	query, resp, e = b.PublicRequest(http.MethodGet, "linear/funding-rate/list", params, &ret)
 	if e != nil {
 		return
 	}
@@ -76,14 +76,14 @@ func (b *ByBit) LinearGetFunding(symbol string, page int, limit int) (query stri
 
 // LinearGetPriceIndex
 // https://api2.bybit.com/api/linear/public/kline/price?symbol=BTCUSDT&from=1607360460&to=1610006520&resolution=30
-func (b *ByBit) LinearGetPriceIndex(symbol string, resolution int, from string, to string) (query string, resp []byte, result []IndexOHLC, e error) {
+func (b *ByBit) LinearGetPriceIndex(symbol string, resolution string, from int64, to int64) (query string, resp []byte, result []IndexOHLC, e error) {
 	var ret IndexOHLCResult
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	params["resolution"] = resolution
 	params["from"] = from
 	params["to"] = to
-	query, _, e = b.PublicRequest(http.MethodGet, "api/linear/public/kline/price", params, &ret)
+	query, resp, e = b.PublicRequest(http.MethodGet, "api/linear/public/kline/price", params, &ret)
 	if e != nil {
 		return
 	}
@@ -93,14 +93,14 @@ func (b *ByBit) LinearGetPriceIndex(symbol string, resolution int, from string, 
 
 // LinearGetPremiumIndex
 // https://api2.bybit.com/api/linear/public/kline/premium-price?symbol=BTCUSDT&from=1607364960&to=1610011020&resolution=30
-func (b *ByBit) LinearGetPremiumIndex(symbol string, resolution int, from string, to string) (query string, resp []byte, result []IndexOHLC, e error) {
+func (b *ByBit) LinearGetPremiumIndex(symbol string, resolution string, from int64, to int64) (query string, resp []byte, result []IndexOHLC, e error) {
 	var ret IndexOHLCResult
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	params["resolution"] = resolution
 	params["from"] = from
 	params["to"] = to
-	query, _, e = b.PublicRequest(http.MethodGet, "api/linear/public/kline/premium-price", params, &ret)
+	query, resp, e = b.PublicRequest(http.MethodGet, "api/linear/public/kline/premium-price", params, &ret)
 	if e != nil {
 		return
 	}

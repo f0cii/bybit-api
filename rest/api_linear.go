@@ -15,7 +15,7 @@ func (b *ByBit) LinearGetKLine(symbol string, interval string, from int64, limit
 	if limit > 0 {
 		params["limit"] = limit
 	}
-	query, _, err = b.PublicRequest(http.MethodGet, "public/linear/kline", params, &ret)
+	query, resp, err = b.PublicRequest(http.MethodGet, "public/linear/kline", params, &ret)
 	if err != nil {
 		return
 	}
