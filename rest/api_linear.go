@@ -6,8 +6,8 @@ import (
 )
 
 // LinearGetKLine
-func (b *ByBit) LinearGetKLine(symbol string, interval string, from int64, limit int) (query string, resp []byte, result []OHLC, err error) {
-	var ret GetKlineResult
+func (b *ByBit) LinearGetKLine(symbol string, interval string, from int64, limit int) (query string, resp []byte, result []OHLCLinear, err error) {
+	var ret GetLinearKlineResult
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	params["interval"] = interval
@@ -67,7 +67,7 @@ func (b *ByBit) LinearGetActiveOrders(symbol string) (query string, resp []byte,
 
 // CreateOrder
 func (b *ByBit) LinearCreateOrder(side string, orderType string, price float64,
-	qty int, timeInForce string, takeProfit float64, stopLoss float64, reduceOnly bool,
+	qty float64, timeInForce string, takeProfit float64, stopLoss float64, reduceOnly bool,
 	closeOnTrigger bool, orderLinkID string, symbol string) (query string, resp []byte, result Order, err error) {
 	var cResult OrderResponse
 	params := map[string]interface{}{}
@@ -85,12 +85,8 @@ func (b *ByBit) LinearCreateOrder(side string, orderType string, price float64,
 	if stopLoss > 0 {
 		params["stop_loss"] = stopLoss
 	}
-	if reduceOnly {
-		params["reduce_only"] = true
-	}
-	if closeOnTrigger {
-		params["close_on_trigger"] = true
-	}
+	params["reduce_only"] = reduceOnly
+	params["close_on_trigger"] = closeOnTrigger
 	if orderLinkID != "" {
 		params["order_link_id"] = orderLinkID
 	}
@@ -107,7 +103,7 @@ func (b *ByBit) LinearCreateOrder(side string, orderType string, price float64,
 }
 
 // ReplaceOrder
-func (b *ByBit) LinearReplaceOrder(symbol string, orderID string, qty int, price float64) (query string, resp []byte, result Order, err error) {
+func (b *ByBit) LinearReplaceOrder(symbol string, orderID string, qty float64, price float64) (query string, resp []byte, result Order, err error) {
 	var cResult OrderResponse
 	params := map[string]interface{}{}
 	params["order_id"] = orderID
@@ -213,7 +209,7 @@ func (b *ByBit) LinearGetActiveStopOrders(symbol string) (query string, resp []b
 
 // CreateStopOrder
 func (b *ByBit) LinearCreateStopOrder(side string, orderType string, price float64, basePrice float64, stopPx float64,
-	qty int, triggerBy string, timeInForce string, closeOnTrigger bool, symbol string) (query string, resp []byte, result StopOrder, err error) {
+	qty float64, triggerBy string, timeInForce string, closeOnTrigger bool, symbol string, reduceOnly bool) (query string, resp []byte, result StopOrder, err error) {
 	var cResult StopOrderResponse
 	params := map[string]interface{}{}
 	params["side"] = side
@@ -226,9 +222,8 @@ func (b *ByBit) LinearCreateStopOrder(side string, orderType string, price float
 	params["base_price"] = basePrice
 	params["stop_px"] = stopPx
 	params["time_in_force"] = timeInForce
-	if closeOnTrigger {
-		params["close_on_trigger"] = true
-	}
+	params["close_on_trigger"] = closeOnTrigger
+	params["reduce_only"] = reduceOnly
 	if triggerBy != "" {
 		params["trigger_by"] = triggerBy
 	}
@@ -245,7 +240,7 @@ func (b *ByBit) LinearCreateStopOrder(side string, orderType string, price float
 }
 
 // ReplaceStopOrder
-func (b *ByBit) LinearReplaceStopOrder(symbol string, orderID string, qty int, price float64, triggerPrice float64) (query string, resp []byte, result StopOrder, err error) {
+func (b *ByBit) LinearReplaceStopOrder(symbol string, orderID string, qty float64, price float64, triggerPrice float64) (query string, resp []byte, result StopOrder, err error) {
 	var cResult StopOrderResponse
 	params := map[string]interface{}{}
 	params["stop_order_id"] = orderID

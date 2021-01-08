@@ -62,6 +62,23 @@ type GetKlineResult struct {
 	Result []OHLC `json:"result"`
 }
 
+type OHLCLinear struct {
+	Symbol   string  `json:"symbol"`
+	Period   string  `json:"period"`
+	OpenTime int64   `json:"open_time"`
+	Open     float64 `json:"open"`
+	High     float64 `json:"high"`
+	Low      float64 `json:"low"`
+	Close    float64 `json:"close"`
+	Volume   float64 `json:"volume"`
+	Turnover float64 `json:"turnover"`
+}
+
+type GetLinearKlineResult struct {
+	BaseResult
+	Result []OHLCLinear `json:"result"`
+}
+
 type OpenInterest struct {
 	Symbol       string       `json:"symbol"`
 	OpenInterest sjson.Number `json:"open_interest"`
