@@ -317,9 +317,9 @@ type OrderListResponsePaginated struct {
 }
 
 type OrderListResponseResultPaginated struct {
-	CurrentPage string  `json:"current_page"`
-	LastPage    string  `json:"last_page"`
-	Data        []Order `json:"data"`
+	CurrentPage sjson.Number `json:"current_page"`
+	LastPage    sjson.Number `json:"last_page"`
+	Data        []Order      `json:"data"`
 }
 
 type OrderResponse struct {

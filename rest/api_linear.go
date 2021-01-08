@@ -166,7 +166,7 @@ func (b *ByBit) LinearCancelAllOrder(symbol string) (query string, resp []byte, 
 }
 
 // GetStopOrders
-func (b *ByBit) LinearGetStopOrders(symbol string, stopOrderStatus string, limit int, page string) (query string, resp []byte, result StopOrderListResponseResult, err error) {
+func (b *ByBit) LinearGetStopOrders(symbol string, stopOrderStatus string, limit int, page int) (query string, resp []byte, result StopOrderListResponseResult, err error) {
 	var cResult StopOrderListResponse
 	if limit == 0 {
 		limit = 20
@@ -195,7 +195,7 @@ func (b *ByBit) LinearGetActiveStopOrders(symbol string) (query string, resp []b
 	var cResult StopOrderArrayResponse
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
-	query, resp, err = b.SignedRequest(http.MethodGet, "private/linear/order/search", params, &cResult)
+	query, resp, err = b.SignedRequest(http.MethodGet, "private/linear/stop-order/search", params, &cResult)
 	if err != nil {
 		return
 	}
