@@ -377,6 +377,7 @@ func (rc *RecConn) keepAlive() {
 
 		for {
 			if !rc.IsConnected() {
+				time.Sleep(time.Millisecond * 100) // avoid burning CPU
 				continue
 			}
 
