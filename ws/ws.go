@@ -8,8 +8,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/chuckpreslar/emission"
+	"github.com/frankrap/bybit-api/recws"
 	"github.com/gorilla/websocket"
-	"github.com/recws-org/recws"
 	"github.com/tidwall/gjson"
 	"log"
 	"strings"
@@ -367,6 +367,6 @@ func (b *ByBitWS) handlePong() (err error) {
 	return nil
 }
 
-func (b *ByBitWS) Close() {
-	b.conn.Close()
+func (b *ByBitWS) CloseAndReconnect() {
+	b.conn.CloseAndReconnect()
 }
