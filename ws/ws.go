@@ -90,7 +90,7 @@ func New(config *Configuration) *ByBitWS {
 
 func (b *ByBitWS) subscribeHandler() error {
 	if b.cfg.DebugMode {
-		log.Printf("subscribeHandler")
+		log.Printf("BybitWs subscribeHandler")
 	}
 
 	b.mu.Lock()
@@ -99,14 +99,14 @@ func (b *ByBitWS) subscribeHandler() error {
 	if b.cfg.ApiKey != "" && b.cfg.SecretKey != "" {
 		err := b.Auth()
 		if err != nil {
-			log.Printf("auth error: %v", err)
+			log.Printf("BybitWs auth error: %v", err)
 		}
 	}
 
 	for _, cmd := range b.subscribeCmds {
 		err := b.SendCmd(cmd)
 		if err != nil {
-			log.Printf("SendCmd return error: %v", err)
+			log.Printf("BybitWs SendCmd return error: %v", err)
 		}
 	}
 
@@ -115,8 +115,7 @@ func (b *ByBitWS) subscribeHandler() error {
 
 func (b *ByBitWS) closeHandler(code int, text string) error {
 	if b.cfg.DebugMode {
-		log.Printf("close handle executed code=%v text=%v",
-			code, text)
+		log.Printf("BybitWs close handle executed code=%v text=%v", code, text)
 	}
 	return nil
 }
@@ -146,7 +145,7 @@ func (b *ByBitWS) SendCmd(cmd Cmd) error {
 func (b *ByBitWS) Send(msg string) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = errors.New(fmt.Sprintf("send error: %v", r))
+			err = errors.New(fmt.Sprintf("BybitWs send error: %v", r))
 		}
 	}()
 
@@ -178,8 +177,11 @@ func (b *ByBitWS) Start() error {
 		for {
 			messageType, data, err := b.conn.ReadMessage()
 			if err != nil {
-				log.Printf("Read error: %v", err)
-				time.Sleep(100 * time.Millisecond)
+				log.Printf("BybitWs Read error, we will close connection: %v", err)
+				b.conn.Close()
+				go func() {
+					_ = b.Start()
+				}()
 				return
 			}
 
@@ -197,7 +199,7 @@ func (b *ByBitWS) connect() {
 func (b *ByBitWS) ping() {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Printf("ping error: %v", r)
+			log.Printf("BybitWs ping error: %v", r)
 		}
 	}()
 
@@ -206,7 +208,7 @@ func (b *ByBitWS) ping() {
 	}
 	err := b.conn.WriteMessage(websocket.TextMessage, []byte(`{"op":"ping"}`))
 	if err != nil {
-		log.Printf("ping error: %v", err)
+		log.Printf("BybitWs ping error: %v", err)
 	}
 }
 
@@ -235,7 +237,7 @@ func (b *ByBitWS) processMessage(messageType int, data []byte) {
 	ret := gjson.ParseBytes(data)
 
 	if b.cfg.DebugMode {
-		log.Printf("%v", string(data))
+		log.Printf("BybitWs %v", string(data))
 	}
 
 	// 处理心跳包
@@ -255,7 +257,7 @@ func (b *ByBitWS) processMessage(messageType int, data []byte) {
 				var data []*OrderBookL2
 				err := json.Unmarshal([]byte(raw), &data)
 				if err != nil {
-					log.Printf("%v", err)
+					log.Printf("BybitWs %v", err)
 					return
 				}
 				b.processOrderBookSnapshot(symbol, data...)
@@ -263,7 +265,7 @@ func (b *ByBitWS) processMessage(messageType int, data []byte) {
 				var delta OrderBookL2Delta
 				err := json.Unmarshal([]byte(raw), &delta)
 				if err != nil {
-					log.Printf("%v", err)
+					log.Printf("BybitWs %v", err)
 					return
 				}
 				b.processOrderBookDelta(symbol, &delta)
@@ -274,7 +276,7 @@ func (b *ByBitWS) processMessage(messageType int, data []byte) {
 			var data []*Trade
 			err := json.Unmarshal([]byte(raw), &data)
 			if err != nil {
-				log.Printf("%v", err)
+				log.Printf("BybitWs %v", err)
 				return
 			}
 			b.processTrade(symbol, data...)
@@ -289,7 +291,7 @@ func (b *ByBitWS) processMessage(messageType int, data []byte) {
 			var data KLine
 			err := json.Unmarshal([]byte(raw), &data)
 			if err != nil {
-				log.Printf("%v", err)
+				log.Printf("BybitWs %v", err)
 				return
 			}
 			b.processKLine(symbol, data)
@@ -304,7 +306,7 @@ func (b *ByBitWS) processMessage(messageType int, data []byte) {
 			var data []*Insurance
 			err := json.Unmarshal([]byte(raw), &data)
 			if err != nil {
-				log.Printf("%v", err)
+				log.Printf("BybitWs %v", err)
 				return
 			}
 			b.processInsurance(currency, data...)
@@ -318,7 +320,7 @@ func (b *ByBitWS) processMessage(messageType int, data []byte) {
 			var data []*Instrument
 			err := json.Unmarshal([]byte(raw), &data)
 			if err != nil {
-				log.Printf("%v", err)
+				log.Printf("BybitWs %v", err)
 				return
 			}
 			b.processInstrument(symbol, data...)
@@ -327,7 +329,7 @@ func (b *ByBitWS) processMessage(messageType int, data []byte) {
 			var data []*Position
 			err := json.Unmarshal([]byte(raw), &data)
 			if err != nil {
-				log.Printf("%v", err)
+				log.Printf("BybitWs %v", err)
 				return
 			}
 			b.processPosition(data...)
@@ -336,7 +338,7 @@ func (b *ByBitWS) processMessage(messageType int, data []byte) {
 			var data []*Execution
 			err := json.Unmarshal([]byte(raw), &data)
 			if err != nil {
-				log.Printf("%v", err)
+				log.Printf("BybitWs %v", err)
 				return
 			}
 			b.processExecution(data...)
@@ -345,7 +347,7 @@ func (b *ByBitWS) processMessage(messageType int, data []byte) {
 			var data []*Order
 			err := json.Unmarshal([]byte(raw), &data)
 			if err != nil {
-				log.Printf("%v", err)
+				log.Printf("BybitWs %v", err)
 				return
 			}
 			b.processOrder(data...)

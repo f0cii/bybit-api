@@ -377,12 +377,11 @@ func (rc *RecConn) keepAlive() {
 
 		for {
 			if !rc.IsConnected() {
-				rc.CloseAndReconnect()
 				return
 			}
 
 			if err := rc.writeControlPingMessage(); err != nil {
-				log.Println(err)
+				log.Printf("BybitRecws KeepAlive Error: %s", err.Error())
 			}
 
 			<-ticker.C
@@ -415,28 +414,26 @@ func (rc *RecConn) connect() {
 
 			if err == nil {
 				if !rc.getNonVerbose() {
-					log.Printf("Dial: connection was successfully established with %s\n", rc.url)
+					log.Printf("BybitRecws Dial: connection was successfully established with %s\n", rc.url)
 				}
 
 				if rc.hasSubscribeHandler() {
 					if err := rc.SubscribeHandler(); err != nil {
-						log.Fatalf("Dial: connect handler failed with %s", err.Error())
+						log.Fatalf("BybitRecws Dial: connect handler failed with %s", err.Error())
 					}
 					if !rc.getNonVerbose() {
-						log.Printf("Dial: connect handler was successfully established with %s\n", rc.url)
+						log.Printf("BybitRecws Dial: connect handler was successfully established with %s\n", rc.url)
 					}
 				}
 
 				if rc.getKeepAliveTimeout() != 0 {
 					rc.keepAlive()
 				}
-
 				return
 			}
 
 			if !rc.getNonVerbose() {
-				log.Println(err)
-				log.Println("Dial: will try again in", nextItvl, "seconds.")
+				log.Printf("BybitRecws Dial: will try again in %v seconds. Error: %s", nextItvl, err.Error())
 			}
 
 			time.Sleep(nextItvl)
