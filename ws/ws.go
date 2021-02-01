@@ -66,6 +66,7 @@ type ByBitWS struct {
 	cancel context.CancelFunc
 	conn   *recws.RecConn
 	mu     sync.RWMutex
+	Ended  bool
 
 	subscribeCmds   []Cmd
 	orderBookLocals map[string]*OrderBookLocal // key: symbol
@@ -177,11 +178,9 @@ func (b *ByBitWS) Start() error {
 		for {
 			messageType, data, err := b.conn.ReadMessage()
 			if err != nil {
-				log.Printf("BybitWs Read error, we will close connection: %v", err)
+				log.Printf("BybitWs Read error, closing connection: %v", err)
 				b.conn.Close()
-				go func() {
-					_ = b.Start()
-				}()
+				b.Ended = true
 				return
 			}
 
