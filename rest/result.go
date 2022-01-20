@@ -2,17 +2,24 @@ package rest
 
 import (
 	sjson "encoding/json"
-	"strings"
 	"time"
 )
 
 type BaseResult struct {
-	RetCode         int         `json:"ret_code"`
-	RetMsg          string      `json:"ret_msg"`
-	ExtCode         string      `json:"ext_code"`
-	Result          interface{} `json:"result"`
-	TimeNow         string      `json:"time_now"`
-	RateLimitStatus int         `json:"rate_limit_status"`
+	RetCode          int         `json:"ret_code"`
+	RetMsg           string      `json:"ret_msg"`
+	ExtCode          string      `json:"ext_code"`
+	ExtInfo          string      `json:"ext_info"`
+	Result           interface{} `json:"result"`
+	TimeNow          string      `json:"time_now"`
+	RateLimitStatus  int         `json:"rate_limit_status"`
+	RateLimitResetMs int64       `json:"rate_limit_reset_ms"`
+	RateLimit        int         `json:"rate_limit"`
+}
+
+type ResultStringArrayResponse struct {
+	BaseResult
+	Result []string `json:"result"`
 }
 
 type Item struct {
@@ -34,12 +41,8 @@ type RawItem struct {
 }
 
 type GetOrderBookResult struct {
-	RetCode int       `json:"ret_code"`
-	RetMsg  string    `json:"ret_msg"`
-	ExtCode string    `json:"ext_code"`
-	ExtInfo string    `json:"ext_info"`
-	Result  []RawItem `json:"result"`
-	TimeNow string    `json:"time_now"`
+	BaseResult
+	Result []RawItem `json:"result"`
 }
 
 type OHLC struct {
@@ -55,38 +58,74 @@ type OHLC struct {
 }
 
 type GetKlineResult struct {
-	RetCode int    `json:"ret_code"`
-	RetMsg  string `json:"ret_msg"`
-	ExtCode string `json:"ext_code"`
-	ExtInfo string `json:"ext_info"`
-	Result  []OHLC `json:"result"`
-	TimeNow string `json:"time_now"`
+	BaseResult
+	Result []OHLC `json:"result"`
+}
+
+type OHLCLinear struct {
+	Symbol   string  `json:"symbol"`
+	Period   string  `json:"period"`
+	OpenTime int64   `json:"open_time"`
+	Open     float64 `json:"open"`
+	High     float64 `json:"high"`
+	Low      float64 `json:"low"`
+	Close    float64 `json:"close"`
+	Volume   float64 `json:"volume"`
+	Turnover float64 `json:"turnover"`
+}
+
+type GetLinearKlineResult struct {
+	BaseResult
+	Result []OHLCLinear `json:"result"`
+}
+
+type OpenInterest struct {
+	Symbol       string       `json:"symbol"`
+	OpenInterest sjson.Number `json:"open_interest"`
+	Timestamp    sjson.Number `json:"timestamp"`
+}
+
+type GetOpenInterestResult struct {
+	BaseResult
+	Result []OpenInterest `json:"result"`
+}
+
+type AccountRatio struct {
+	Symbol    string       `json:"symbol"`
+	BuyRatio  sjson.Number `json:"buy_ratio"`
+	SellRatio sjson.Number `json:"sell_ratio"`
+	Timestamp sjson.Number `json:"timestamp"`
+}
+
+type GetAccountRatioResult struct {
+	BaseResult
+	Result []AccountRatio `json:"result"`
 }
 
 type Ticker struct {
-	Symbol               string    `json:"symbol"`
-	BidPrice             float64   `json:"bid_price,string"`
-	AskPrice             float64   `json:"ask_price,string"`
-	LastPrice            float64   `json:"last_price,string"`
-	LastTickDirection    string    `json:"last_tick_direction"`
-	PrevPrice24H         float64   `json:"prev_price_24h,string"`
-	Price24HPcnt         float64   `json:"price_24h_pcnt,string"`
-	HighPrice24H         float64   `json:"high_price_24h,string"`
-	LowPrice24H          float64   `json:"low_price_24h,string"`
-	PrevPrice1H          float64   `json:"prev_price_1h,string"`
-	Price1HPcnt          float64   `json:"price_1h_pcnt,string"`
-	MarkPrice            float64   `json:"mark_price,string"`
-	IndexPrice           float64   `json:"index_price,string"`
-	OpenInterest         int       `json:"open_interest"`
-	OpenValue            float64   `json:"open_value,string"`
-	TotalTurnover        float64   `json:"total_turnover,string"`
-	Turnover24H          float64   `json:"turnover_24h,string"`
-	TotalVolume          int64     `json:"total_volume"`
-	Volume24H            int64     `json:"volume_24h"`
-	FundingRate          float64   `json:"funding_rate,string"`
-	PredictedFundingRate float64   `json:"predicted_funding_rate,string"`
-	NextFundingTime      time.Time `json:"next_funding_time"`
-	CountdownHour        int       `json:"countdown_hour"`
+	Symbol               string       `json:"symbol"`
+	BidPrice             sjson.Number `json:"bid_price"`
+	AskPrice             sjson.Number `json:"ask_price"`
+	LastPrice            float64      `json:"last_price,string"`
+	LastTickDirection    string       `json:"last_tick_direction"`
+	PrevPrice24H         float64      `json:"prev_price_24h,string"`
+	Price24HPcnt         float64      `json:"price_24h_pcnt,string"`
+	HighPrice24H         float64      `json:"high_price_24h,string"`
+	LowPrice24H          float64      `json:"low_price_24h,string"`
+	PrevPrice1H          float64      `json:"prev_price_1h,string"`
+	Price1HPcnt          float64      `json:"price_1h_pcnt,string"`
+	MarkPrice            float64      `json:"mark_price,string"`
+	IndexPrice           float64      `json:"index_price,string"`
+	OpenInterest         float64      `json:"open_interest"`
+	OpenValue            float64      `json:"open_value,string"`
+	TotalTurnover        float64      `json:"total_turnover,string"`
+	Turnover24H          float64      `json:"turnover_24h,string"`
+	TotalVolume          float64      `json:"total_volume"`
+	Volume24H            float64      `json:"volume_24h"`
+	FundingRate          float64      `json:"funding_rate,string"`
+	PredictedFundingRate float64      `json:"predicted_funding_rate,string"`
+	NextFundingTime      string       `json:"next_funding_time"` // string because can be empty, parse it with "2006-01-02T15:04:05Z07:00"
+	CountdownHour        int          `json:"countdown_hour"`
 }
 
 type GetTickersResult struct {
@@ -191,234 +230,69 @@ type GetBalanceResultData struct {
 	USDT Balance `json:"USDT"`
 }
 
-type CreateOrderResult struct {
-	RetCode         int    `json:"ret_code"`
-	RetMsg          string `json:"ret_msg"`
-	ExtCode         string `json:"ext_code"`
-	Result          Order  `json:"result"`
-	TimeNow         string `json:"time_now"`
-	RateLimitStatus int    `json:"rate_limit_status"`
-}
-
-type OrderLite struct {
-	OrderID string `json:"order_id"`
-}
-
-type ReplaceOrderResult struct {
-	RetCode         int       `json:"ret_code"`
-	RetMsg          string    `json:"ret_msg"`
-	ExtCode         string    `json:"ext_code"`
-	Result          OrderLite `json:"result"`
-	TimeNow         string    `json:"time_now"`
-	RateLimitStatus int       `json:"rate_limit_status"`
-}
-
-type CancelOrderResult struct {
-	RetCode         int    `json:"ret_code"`
-	RetMsg          string `json:"ret_msg"`
-	ExtCode         string `json:"ext_code"`
-	Result          Order  `json:"result"`
-	TimeNow         string `json:"time_now"`
-	RateLimitStatus int    `json:"rate_limit_status"`
-}
-
-type OrderListResultData struct {
-	Data        []Order `json:"data"`
-	CurrentPage int     `json:"current_page"`
-	LastPage    int     `json:"last_page"`
-}
-
-type OrderListResult struct {
-	RetCode         int                 `json:"ret_code"`
-	RetMsg          string              `json:"ret_msg"`
-	ExtCode         string              `json:"ext_code"`
-	Result          OrderListResultData `json:"result"`
-	TimeNow         string              `json:"time_now"`
-	RateLimitStatus int                 `json:"rate_limit_status"`
-}
-
-// Order ...
-type Order struct {
-	OrderID string `json:"order_id"`
-	StopOrderID     string       `json:"stop_order_id"`
-	UserID      int     `json:"user_id"`
-	Symbol      string  `json:"symbol"`
-	Side        string  `json:"side"`
-	OrderType   string  `json:"order_type"`
-	Price       float64 `json:"price"`
-	Qty         float64 `json:"qty"`
-	TimeInForce string  `json:"time_in_force"`
-	//StopOrderType   string       `json:"stop_order_type,omitempty"`
-	//StopPx          sjson.Number `json:"stop_px,omitempty"`
-	OrderStatus string `json:"order_status"`
-	//StopOrderStatus string       `json:"stop_order_status"`
-	LastExecTime  string     `json:"last_exec_time"`
-	LastExecPrice float64    `json:"last_exec_price"`
-	LeavesQty     float64    `json:"leaves_qty"`
-	CumExecQty    float64    `json:"cum_exec_qty"`
-	CumExecValue  float64    `json:"cum_exec_value"`
-	CumExecFee    float64    `json:"cum_exec_fee"`
-	RejectReason  string     `json:"reject_reason"`
-	OrderLinkID   string     `json:"order_link_id"`
-	CreatedAt     time.Time  `json:"created_at"`
-	UpdatedAt     time.Time  `json:"updated_at"`
-	ExtFields     *ExtFields `json:"ext_fields,omitempty"`
-}
-
-type ExtFields struct {
-	ReduceOnly  bool   `json:"reduce_only"`
-	OpFrom      string `json:"op_from"`
-	Remark      string `json:"remark"`
-	OReqNum     int64  `json:"o_req_num"`
-	XreqType    string `json:"xreq_type"`
-	CrossStatus string `json:"cross_status,omitempty"`
-}
-
-type InExtFields struct {
-	ReduceOnly  bool   `json:"reduce_only"`
-	OpFrom      string `json:"op_from"`
-	Remark      string `json:"remark"`
-	OReqNum     int64  `json:"o_req_num"`
-	XreqType    string `json:"xreq_type"`
-	CrossStatus string `json:"cross_status,omitempty"`
-}
-
-func (e *ExtFields) MarshalJSON() ([]byte, error) {
-	return json.Marshal(e)
-}
-
-func (e *ExtFields) UnmarshalJSON(b []byte) error {
-	s := string(b)
-	if strings.HasPrefix(s, "[") {
-		return nil
-	}
-	o := InExtFields{}
-	if err := json.Unmarshal(b, &o); err == nil {
-		e.ReduceOnly = o.ReduceOnly
-		e.OpFrom = o.OpFrom
-		e.Remark = o.Remark
-		e.OReqNum = o.OReqNum
-		e.XreqType = o.XreqType
-		e.CrossStatus = o.CrossStatus
-		return nil
-	} else {
-		return err
-	}
-}
-
-type GetLeverageResult struct {
-	RetCode         int                     `json:"ret_code"`
-	RetMsg          string                  `json:"ret_msg"`
-	ExtCode         string                  `json:"ext_code"`
-	Result          map[string]LeverageItem `json:"result"`
-	TimeNow         string                  `json:"time_now"`
-	RateLimitStatus int                     `json:"rate_limit_status"`
-}
-
-type LeverageItem struct {
-	Leverage int `json:"leverage"`
-}
-
-type PositionV1 struct {
-	ID                  int                `json:"id"`
-	UserID              int                `json:"user_id"`
-	RiskID              int                `json:"risk_id"`
-	Symbol              string             `json:"symbol"`
-	Size                float64            `json:"size"`
-	Side                string             `json:"side"`
-	EntryPrice          float64            `json:"entry_price"`
-	LiqPrice            float64            `json:"liq_price"`
-	BustPrice           float64            `json:"bust_price"`
-	TakeProfit          float64            `json:"take_profit"`
-	StopLoss            float64            `json:"stop_loss"`
-	TrailingStop        float64            `json:"trailing_stop"`
-	PositionValue       float64            `json:"position_value"`
-	Leverage            float64            `json:"leverage"`
-	PositionStatus      string             `json:"position_status"`
-	AutoAddMargin       float64            `json:"auto_add_margin"`
-	OrderMargin         float64            `json:"order_margin"`
-	PositionMargin      float64            `json:"position_margin"`
-	OccClosingFee       float64            `json:"occ_closing_fee"`
-	OccFundingFee       float64            `json:"occ_funding_fee"`
-	ExtFields           *PositionExtFields `json:"ext_fields"`
-	WalletBalance       float64            `json:"wallet_balance"`
-	CumRealisedPnl      float64            `json:"cum_realised_pnl"`
-	CumCommission       float64            `json:"cum_commission"`
-	RealisedPnl         float64            `json:"realised_pnl"`
-	DeleverageIndicator float64            `json:"deleverage_indicator"`
-	OcCalcData          string             `json:"oc_calc_data"`
-	CrossSeq            float64            `json:"cross_seq"`
-	PositionSeq         float64            `json:"position_seq"`
-	CreatedAt           time.Time          `json:"created_at"`
-	UpdatedAt           time.Time          `json:"updated_at"`
-	UnrealisedPnl       float64            `json:"unrealised_pnl"`
-}
-
 type Position struct {
-	ID                  int                `json:"id"`
-	UserID              int                `json:"user_id"`
-	RiskID              int                `json:"risk_id"`
-	Symbol              string             `json:"symbol"`
-	Size                float64            `json:"size"`
-	Side                string             `json:"side"`
-	EntryPrice          float64            `json:"entry_price,string"`
-	LiqPrice            float64            `json:"liq_price,string"`
-	BustPrice           float64            `json:"bust_price,string"`
-	TakeProfit          float64            `json:"take_profit,string"`
-	StopLoss            float64            `json:"stop_loss,string"`
-	TrailingStop        float64            `json:"trailing_stop,string"`
-	PositionValue       float64            `json:"position_value,string"`
-	Leverage            float64            `json:"leverage,string"`
-	PositionStatus      string             `json:"position_status"`
-	AutoAddMargin       float64            `json:"auto_add_margin"`
-	OrderMargin         float64            `json:"order_margin,string"`
-	PositionMargin      float64            `json:"position_margin,string"`
-	OccClosingFee       float64            `json:"occ_closing_fee,string"`
-	OccFundingFee       float64            `json:"occ_funding_fee,string"`
-	ExtFields           *PositionExtFields `json:"ext_fields"`
-	WalletBalance       float64            `json:"wallet_balance,string"`
-	CumRealisedPnl      float64            `json:"cum_realised_pnl,string"`
-	CumCommission       float64            `json:"cum_commission,string"`
-	RealisedPnl         float64            `json:"realised_pnl,string"`
-	DeleverageIndicator float64            `json:"deleverage_indicator"`
-	OcCalcData          string             `json:"oc_calc_data"`
-	CrossSeq            float64            `json:"cross_seq"`
-	PositionSeq         float64            `json:"position_seq"`
-	CreatedAt           time.Time          `json:"created_at"`
-	UpdatedAt           time.Time          `json:"updated_at"`
-	UnrealisedPnl       float64            `json:"unrealised_pnl"`
+	Id                  int       `json:"id"`
+	UserId              int       `json:"user_id"`
+	RiskId              int       `json:"risk_id"`
+	Symbol              string    `json:"symbol"`
+	Size                float64   `json:"size"`
+	Side                string    `json:"side"`
+	EntryPrice          float64   `json:"entry_price,string"`
+	LiqPrice            float64   `json:"liq_price,string"`
+	BustPrice           float64   `json:"bust_price,string"`
+	TakeProfit          float64   `json:"take_profit,string"`
+	StopLoss            float64   `json:"stop_loss,string"`
+	TrailingStop        float64   `json:"trailing_stop,string"`
+	PositionValue       float64   `json:"position_value,string"`
+	Leverage            float64   `json:"leverage,string"`
+	PositionStatus      string    `json:"position_status"`
+	AutoAddMargin       float64   `json:"auto_add_margin"`
+	OrderMargin         float64   `json:"order_margin,string"`
+	PositionMargin      float64   `json:"position_margin,string"`
+	OccClosingFee       float64   `json:"occ_closing_fee,string"`
+	OccFundingFee       float64   `json:"occ_funding_fee,string"`
+	WalletBalance       float64   `json:"wallet_balance,string"`
+	CumRealisedPnl      float64   `json:"cum_realised_pnl,string"`
+	CumCommission       float64   `json:"cum_commission,string"`
+	RealisedPnl         float64   `json:"realised_pnl,string"`
+	DeleverageIndicator float64   `json:"deleverage_indicator"`
+	OcCalcData          string    `json:"oc_calc_data"`
+	CrossSeq            float64   `json:"cross_seq"`
+	PositionSeq         float64   `json:"position_seq"`
+	CreatedAt           time.Time `json:"created_at"`
+	UpdatedAt           time.Time `json:"updated_at"`
+	UnrealisedPnl       float64   `json:"unrealised_pnl"`
 }
 
-type PositionExtFields struct {
-	Remark string `json:"_remark"`
-}
-
-type PositionListResult struct {
+type PositionResponse struct {
 	BaseResult
-	ExtInfo interface{}  `json:"ext_info"`
-	Result  []PositionV1 `json:"result"`
+	Result Position `json:"result"`
 }
 
-type GetPositionResult struct {
+type PositionArrayResponse struct {
 	BaseResult
-	ExtInfo interface{} `json:"ext_info"`
-	Result  Position    `json:"result"`
+	Result []PositionData `json:"result"`
 }
 
-type OrderV2 struct {
-	UserID        int          `json:"user_id"`
-	OrderID       string       `json:"order_id"`
+type PositionData struct {
+	IsValid bool     `json:"is_valid"`
+	Data    Position `json:"data"`
+}
+
+type Order struct {
+	UserId        int          `json:"user_id"`
+	OrderId       string       `json:"order_id"`
 	Symbol        string       `json:"symbol"`
 	Side          string       `json:"side"`
 	OrderType     string       `json:"order_type"`
 	Price         sjson.Number `json:"price"`
-	Qty           float64      `json:"qty"`
+	Qty           sjson.Number `json:"qty"`
 	TimeInForce   string       `json:"time_in_force"`
 	OrderStatus   string       `json:"order_status"`
 	LastExecTime  sjson.Number `json:"last_exec_time"`
 	LastExecPrice sjson.Number `json:"last_exec_price"`
-	LeavesQty     float64      `json:"leaves_qty"`
-	CumExecQty    float64      `json:"cum_exec_qty"`
+	LeavesQty     sjson.Number `json:"leaves_qty"`
+	CumExecQty    sjson.Number `json:"cum_exec_qty"`
 	CumExecValue  sjson.Number `json:"cum_exec_value"`
 	CumExecFee    sjson.Number `json:"cum_exec_fee"`
 	RejectReason  string       `json:"reject_reason"`
@@ -427,123 +301,157 @@ type OrderV2 struct {
 	UpdatedAt     time.Time    `json:"updated_at"`
 }
 
-type CreateOrderV2Result struct {
-	RetCode          int     `json:"ret_code"`
-	RetMsg           string  `json:"ret_msg"`
-	ExtCode          string  `json:"ext_code"`
-	ExtInfo          string  `json:"ext_info"`
-	Result           OrderV2 `json:"result"`
-	TimeNow          string  `json:"time_now"`
-	RateLimitStatus  int     `json:"rate_limit_status"`
-	RateLimitResetMs int64   `json:"rate_limit_reset_ms"`
-	RateLimit        int     `json:"rate_limit"`
+type OrderListResponse struct {
+	BaseResult
+	Result OrderListResponseResult `json:"result"`
 }
 
-type CancelOrderV2Result struct {
-	RetCode          int     `json:"ret_code"`
-	RetMsg           string  `json:"ret_msg"`
-	ExtCode          string  `json:"ext_code"`
-	ExtInfo          string  `json:"ext_info"`
-	Result           OrderV2 `json:"result"`
-	TimeNow          string  `json:"time_now"`
-	RateLimitStatus  int     `json:"rate_limit_status"`
-	RateLimitResetMs int64   `json:"rate_limit_reset_ms"`
-	RateLimit        int     `json:"rate_limit"`
+type OrderListResponseResult struct {
+	Data   []Order `json:"data"`
+	Cursor string  `json:"cursor"`
 }
 
-type CancelAllOrderV2Result struct {
-	RetCode          int       `json:"ret_code"`
-	RetMsg           string    `json:"ret_msg"`
-	ExtCode          string    `json:"ext_code"`
-	ExtInfo          string    `json:"ext_info"`
-	Result           []OrderV2 `json:"result"`
-	TimeNow          string    `json:"time_now"`
-	RateLimitStatus  int       `json:"rate_limit_status"`
-	RateLimitResetMs int64     `json:"rate_limit_reset_ms"`
-	RateLimit        int       `json:"rate_limit"`
+type OrderListResponsePaginated struct {
+	BaseResult
+	Result OrderListResponseResultPaginated `json:"result"`
 }
 
-type QueryOrderResult struct {
-	RetCode          int     `json:"ret_code"`
-	RetMsg           string  `json:"ret_msg"`
-	ExtCode          string  `json:"ext_code"`
-	ExtInfo          string  `json:"ext_info"`
-	Result           OrderV2 `json:"result"`
-	TimeNow          string  `json:"time_now"`
-	RateLimitStatus  int     `json:"rate_limit_status"`
-	RateLimitResetMs int64   `json:"rate_limit_reset_ms"`
-	RateLimit        int     `json:"rate_limit"`
+type OrderListResponseResultPaginated struct {
+	CurrentPage sjson.Number `json:"current_page"`
+	LastPage    sjson.Number `json:"last_page"`
+	Data        []Order      `json:"data"`
 }
 
-type StopOrderV2 struct {
-	ClOrdID           string       `json:"clOrdID"`
-	UserID            int64        `json:"user_id"`
+type OrderResponse struct {
+	BaseResult
+	Result Order `json:"result"`
+}
+
+type OrderArrayResponse struct {
+	BaseResult
+	Result []Order `json:"result"`
+}
+
+type StopOrder struct {
+	OrderId           string       `json:"order_id"`
+	OrderType         string       `json:"order_type"`
+	OrderStatus       string       `json:"order_status"`
+	StopOrderId       string       `json:"stop_order_id"`
+	StopOrderType     string       `json:"stop_order_type"`
+	StopOrderStatus   string       `json:"stop_order_status"`
+	StopPx            sjson.Number `json:"stop_px"`
+	UserId            int64        `json:"user_id"`
 	Symbol            string       `json:"symbol"`
 	Side              string       `json:"side"`
-	OrderType         string       `json:"order_type"`
 	Price             sjson.Number `json:"price"`
-	Qty               float64      `json:"qty"`
+	Qty               sjson.Number `json:"qty"`
 	TimeInForce       string       `json:"time_in_force"`
 	CreateType        string       `json:"create_type"`
 	CancelType        string       `json:"cancel_type"`
-	OrderStatus       string       `json:"order_status"`
-	LeavesQty         float64      `json:"leaves_qty"`
+	LeavesQty         sjson.Number `json:"leaves_qty"`
 	LeavesValue       string       `json:"leaves_value"`
 	CreatedAt         time.Time    `json:"created_at"`
 	UpdatedAt         time.Time    `json:"updated_at"`
 	CrossStatus       string       `json:"cross_status"`
-	CrossSeq          float64      `json:"cross_seq"`
-	StopOrderType     string       `json:"stop_order_type"`
+	CrossSeq          sjson.Number `json:"cross_seq"`
 	TriggerBy         string       `json:"trigger_by"`
 	BasePrice         sjson.Number `json:"base_price"`
 	ExpectedDirection string       `json:"expected_direction"`
 }
 
-type CancelStopOrdersV2Result struct {
-	RetCode          int           `json:"ret_code"`
-	RetMsg           string        `json:"ret_msg"`
-	ExtCode          string        `json:"ext_code"`
-	ExtInfo          string        `json:"ext_info"`
-	Result           []StopOrderV2 `json:"result"`
-	TimeNow          string        `json:"time_now"`
-	RateLimitStatus  int           `json:"rate_limit_status"`
-	RateLimitResetMs int64         `json:"rate_limit_reset_ms"`
-	RateLimit        int           `json:"rate_limit"`
+type StopOrderListResponse struct {
+	BaseResult
+	Result StopOrderListResponseResult `json:"result"`
 }
 
-type StopOrder struct {
-	UserID          int64     `json:"user_id"`
-	StopOrderStatus string    `json:"stop_order_status"`
-	Symbol          string    `json:"symbol"`
-	Side            string    `json:"side"`
-	OrderType       string    `json:"order_type"`
-	Price           float64   `json:"price"`
-	Qty             float64   `json:"qty"`
-	TimeInForce     string    `json:"time_in_force"`
-	StopOrderType   string    `json:"stop_order_type"`
-	TriggerBy       string    `json:"trigger_by"`
-	BasePrice       float64   `json:"base_price"`
-	OrderLinkID     string    `json:"order_link_id"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
-	StopPx          float64   `json:"stop_px"`
-	StopOrderID     string    `json:"stop_order_id"`
+type StopOrderListResponseResult struct {
+	Data   []StopOrder `json:"data"`
+	Cursor string      `json:"cursor"`
 }
 
-type GetStopOrdersResultData struct {
-	CurrentPage int         `json:"current_page"`
-	LastPage    int         `json:"last_page"`
+type StopOrderResponse struct {
+	BaseResult
+	Result StopOrder `json:"result"`
+}
+
+type StopOrderArrayResponse struct {
+	BaseResult
+	Result []StopOrder `json:"result"`
+}
+
+type StopOrderListResponsePaginated struct {
+	BaseResult
+	Result StopOrderListResponseResultPaginated `json:"result"`
+}
+
+type StopOrderListResponseResultPaginated struct {
+	CurrentPage string      `json:"current_page"`
+	LastPage    string      `json:"last_page"`
 	Data        []StopOrder `json:"data"`
 }
 
-type GetStopOrdersResult struct {
-	RetCode          int                     `json:"ret_code"`
-	RetMsg           string                  `json:"ret_msg"`
-	ExtCode          string                  `json:"ext_code"`
-	Result           GetStopOrdersResultData `json:"result"`
-	ExtInfo          interface{}             `json:"ext_info"`
-	TimeNow          string                  `json:"time_now"`
-	RateLimitStatus  int                     `json:"rate_limit_status"`
-	RateLimitResetMs int64                   `json:"rate_limit_reset_ms"`
-	RateLimit        int                     `json:"rate_limit"`
+type WalletFundRecord struct {
+	Id            int          `json:"id"`
+	UserId        int          `json:"user_id"`
+	Coin          string       `json:"coin"`
+	WalletId      int          `json:"wallet_id"`
+	Type          string       `json:"type"`
+	Amount        sjson.Number `json:"amount"`
+	TxId          string       `json:"tx_id"`
+	Address       string       `json:"address"`
+	WalletBalance sjson.Number `json:"wallet_balance"`
+	ExecTime      sjson.Number `json:"exec_time"`
+	CrossSeq      sjson.Number `json:"cross_seq"`
+}
+
+type WalletFundRecordResponse struct {
+	BaseResult
+	Result OrderListResponseArray `json:"result"`
+}
+
+type OrderListResponseArray struct {
+	Data []WalletFundRecord `json:"data"`
+}
+
+type Funding struct {
+	CurrentPage  int           `json:"current_page"`
+	Data         []FundingData `json:"data"`
+	FirstPageUrl string        `json:"first_page_url"`
+	From         int           `json:"from"`
+	LastPage     int           `json:"last_page"`
+	LastPageUrl  string        `json:"last_page_url"`
+	NextPageUrl  string        `json:"next_page_url"`
+	Path         string        `json:"path"`
+	PerPage      sjson.Number  `json:"per_page"`
+	PrevPageUrl  string        `json:"prev_page_url"`
+	To           int           `json:"to"`
+	Total        int           `json:"total"`
+}
+
+type FundingData struct {
+	Id     int          `json:"id"`
+	Symbol string       `json:"symbol"`
+	Value  sjson.Number `json:"value"`
+	Time   string       `json:"time"`
+}
+
+type FundingResult struct {
+	BaseResult
+	Result Funding `json:"result"`
+}
+
+type IndexOHLC struct {
+	Id      int          `json:"id"`
+	Symbol  string       `json:"symbol"`
+	Open    sjson.Number `json:"open"`
+	High    sjson.Number `json:"high"`
+	Low     sjson.Number `json:"low"`
+	Close   sjson.Number `json:"close"`
+	StartAt int          `json:"start_at"`
+	Period  string       `json:"period"`
+}
+
+type IndexOHLCResult struct {
+	BaseResult
+	Result []IndexOHLC `json:"result"`
 }
