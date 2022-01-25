@@ -3,19 +3,42 @@ package rest
 import (
 	"github.com/stretchr/testify/assert"
 	"log"
+	"net/http"
+	"net/url"
 	"testing"
 	"time"
 )
 
 // https://t.me/Bybitapi
 
+// HttpProxy  = "http://127.0.0.1:6152"
+// SocksProxy = "socks5://127.0.0.1:6153"
+func newClient(proxyURL string) *http.Client {
+	if proxyURL == "" {
+		return nil
+	}
+	proxy := func(_ *http.Request) (*url.URL, error) {
+		return url.Parse(proxyURL)
+	}
+
+	httpTransport := &http.Transport{
+		Proxy: proxy,
+	}
+
+	httpClient := &http.Client{
+		Transport: httpTransport,
+	}
+	return httpClient
+}
+
 func newByBit() *ByBit {
 	//baseURL := "https://api.bybit.com/"
-	//baseURL := "https://api-testnet.bybit.com/"
-	baseURL := "https://api.bytick.com/"
-	apiKey := "6IASD6KDBdunn5qLpT"
-	secretKey := "nXjZMUiB3aMiPaQ9EUKYFloYNd0zM39RjRWF"
-	b := New(nil, baseURL, apiKey, secretKey, true)
+	baseURL := "https://api-testnet.bybit.com/"
+	//baseURL := "https://api.bytick.com/"
+	apiKey := "rwEwhfC6mDFYIGfcyb"
+	secretKey := "yfNJSzGapfFwbJyvguAyVXLJSIOCIegBg42Z"
+	client := newClient("socks5://127.0.0.1:1080")
+	b := New(client, baseURL, apiKey, secretKey, true)
 	err := b.SetCorrectServerTime()
 	if err != nil {
 		log.Printf("%v", err)
@@ -84,7 +107,8 @@ func TestByBit_GetSymbols(t *testing.T) {
 
 func TestByBit_GetWalletBalance(t *testing.T) {
 	b := newByBit()
-	_, _, balance, err := b.GetWalletBalance("BTC")
+	//_, _, balance, err := b.GetWalletBalance("BTC")
+	_, _, balance, err := b.GetWalletBalance("USDT")
 	if err != nil {
 		t.Error(err)
 		return

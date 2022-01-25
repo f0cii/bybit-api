@@ -23,8 +23,16 @@ func (b *ByBit) LinearGetKLine(symbol string, interval string, from int64, limit
 	return
 }
 
-// GetOrders
-func (b *ByBit) LinearGetOrders(symbol string, orderStatus string, limit int, page int) (query string, resp []byte, result OrderListResponsePaginated, err error) {
+// LinearGetOrders GetOrders
+// orderStatus:
+// Created - order has been accepted by the system but not yet put through the matching engine
+// Rejected - order has been triggered but failed to be placed (e.g. due to insufficient margin)
+// New - order has been placed successfully
+// PartiallyFilled
+// Filled
+// Cancelled
+// PendingCancel - matching engine has received the cancelation request but it may not be canceled successfully
+func (b *ByBit) LinearGetOrders(symbol string, orderStatus string, limit int, page int) (query string, resp []byte, result OrderListResponseResultPaginated, err error) {
 	var cResult OrderListResponsePaginated
 	if limit == 0 {
 		limit = 20
@@ -44,7 +52,7 @@ func (b *ByBit) LinearGetOrders(symbol string, orderStatus string, limit int, pa
 		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
-	result = cResult
+	result = cResult.Result
 	return
 }
 
@@ -65,7 +73,10 @@ func (b *ByBit) LinearGetActiveOrders(symbol string) (query string, resp []byte,
 	return
 }
 
-// CreateOrder
+// LinearCreateOrder CreateOrder
+// side: Buy/Sell
+// orderType: Limit/Market
+// timeInForce: GoodTillCancel/ImmediateOrCancel/FillOrKill/PostOnly
 func (b *ByBit) LinearCreateOrder(side string, orderType string, price float64,
 	qty float64, timeInForce string, takeProfit float64, stopLoss float64, reduceOnly bool,
 	closeOnTrigger bool, orderLinkID string, symbol string) (query string, resp []byte, result Order, err error) {
@@ -98,6 +109,7 @@ func (b *ByBit) LinearCreateOrder(side string, orderType string, price float64,
 		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
+	// {"ret_code":0,"ret_msg":"OK","ext_code":"","ext_info":"","result":{"order_id":"6f771a91-0f4e-4c01-973d-b58e6390ece0","user_id":443679,"symbol":"BTCUSDT","side":"Buy","order_type":"Limit","price":37927.5,"qty":1,"time_in_force":"GoodTillCancel","order_status":"Created","last_exec_price":0,"cum_exec_qty":0,"cum_exec_value":0,"cum_exec_fee":0,"reduce_only":false,"close_on_trigger":false,"order_link_id":"","created_time":"2022-01-25T02:06:25Z","updated_time":"2022-01-25T02:06:25Z","take_profit":0,"stop_loss":0,"tp_trigger_by":"UNKNOWN","sl_trigger_by":"UNKNOWN","position_idx":1},"time_now":"1643076385.967696","rate_limit_status":99,"rate_limit_reset_ms":1643076385963,"rate_limit":100}
 	result = cResult.Result
 	return
 }
@@ -126,13 +138,18 @@ func (b *ByBit) LinearReplaceOrder(symbol string, orderID string, qty float64, p
 	return
 }
 
-// CancelOrder
-func (b *ByBit) LinearCancelOrder(orderID string, symbol string) (query string, resp []byte, result Order, err error) {
+// LinearCancelOrder
+// orderID: Order ID. Required if not passing order_link_id
+// orderLinkId: Unique user-set order ID. Required if not passing order_id
+func (b *ByBit) LinearCancelOrder(orderID string, orderLinkId string, symbol string) (query string, resp []byte, result Order, err error) {
 	var cResult OrderResponse
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
 	if orderID != "" {
 		params["order_id"] = orderID
+	}
+	if orderLinkId != "" {
+		params["order_link_id"] = orderLinkId
 	}
 	query, resp, err = b.SignedRequest(http.MethodPost, "private/linear/order/cancel", params, &cResult)
 	if err != nil {
@@ -142,12 +159,12 @@ func (b *ByBit) LinearCancelOrder(orderID string, symbol string) (query string, 
 		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
-
+	// {"ret_code":0,"ret_msg":"OK","ext_code":"","ext_info":"","result":{"order_id":"d328974d-bfe8-484f-a0e9-30159bc78aaf"},"time_now":"1643077335.069762","rate_limit_status":99,"rate_limit_reset_ms":1643077335056,"rate_limit":100}
 	result = cResult.Result
 	return
 }
 
-// CancelAllOrder
+// LinearCancelAllOrder
 func (b *ByBit) LinearCancelAllOrder(symbol string) (query string, resp []byte, result []string, err error) {
 	var cResult ResultStringArrayResponse
 	params := map[string]interface{}{}
@@ -165,7 +182,7 @@ func (b *ByBit) LinearCancelAllOrder(symbol string) (query string, resp []byte, 
 	return
 }
 
-// GetStopOrders
+// LinearGetStopOrders
 func (b *ByBit) LinearGetStopOrders(symbol string, stopOrderStatus string, limit int, page int) (query string, resp []byte, result StopOrderListResponseResult, err error) {
 	var cResult StopOrderListResponse
 	if limit == 0 {
@@ -190,7 +207,7 @@ func (b *ByBit) LinearGetStopOrders(symbol string, stopOrderStatus string, limit
 	return
 }
 
-// GetActiveStopOrders
+// LinearGetActiveStopOrders
 func (b *ByBit) LinearGetActiveStopOrders(symbol string) (query string, resp []byte, result StopOrderArrayResponse, err error) {
 	var cResult StopOrderArrayResponse
 	params := map[string]interface{}{}
@@ -298,5 +315,40 @@ func (b *ByBit) LinearCancelAllStopOrders(symbol string) (query string, resp []b
 		return
 	}
 	result = cResult.Result
+	return
+}
+
+// LinearGetPositions
+func (b *ByBit) LinearGetPositions() (query string, resp []byte, result []LinearPositionData, err error) {
+	var r LinearPositionDataArrayResponse
+	params := map[string]interface{}{}
+	query, resp, err = b.SignedRequest(http.MethodGet, "private/linear/position/list", params, &r)
+	if err != nil {
+		return
+	}
+	if r.RetCode != 0 {
+		err = fmt.Errorf("%v body: [%v]", r.RetMsg, string(resp))
+		return
+	}
+	result = r.Result
+	return
+}
+
+// LinearGetPosition
+func (b *ByBit) LinearGetPosition(symbol string) (query string, resp []byte, result []LinearPosition, err error) {
+	var r LinearPositionArrayResponse
+	params := map[string]interface{}{}
+	if symbol != "" {
+		params["symbol"] = symbol
+	}
+	query, resp, err = b.SignedRequest(http.MethodGet, "private/linear/position/list", params, &r)
+	if err != nil {
+		return
+	}
+	if r.RetCode != 0 {
+		err = fmt.Errorf("%v body: [%v]", r.RetMsg, string(resp))
+		return
+	}
+	result = r.Result
 	return
 }

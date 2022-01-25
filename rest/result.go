@@ -264,6 +264,34 @@ type Position struct {
 	UnrealisedPnl       float64   `json:"unrealised_pnl"`
 }
 
+type LinearPosition struct {
+	UserID              int     `json:"user_id"`
+	Symbol              string  `json:"symbol"`
+	Side                string  `json:"side"`
+	Size                float64 `json:"size"`
+	PositionValue       float64 `json:"position_value"`
+	EntryPrice          float64 `json:"entry_price"`
+	LiqPrice            float64 `json:"liq_price"`
+	BustPrice           float64 `json:"bust_price"`
+	Leverage            float64 `json:"leverage"`
+	AutoAddMargin       float64 `json:"auto_add_margin"`
+	IsIsolated          bool    `json:"is_isolated"`
+	PositionMargin      float64 `json:"position_margin"`
+	OccClosingFee       float64 `json:"occ_closing_fee"`
+	RealisedPnl         float64 `json:"realised_pnl"`
+	CumRealisedPnl      float64 `json:"cum_realised_pnl"`
+	FreeQty             float64 `json:"free_qty"`
+	TpSlMode            string  `json:"tp_sl_mode"`
+	UnrealisedPnl       float64 `json:"unrealised_pnl"`
+	DeleverageIndicator float64 `json:"deleverage_indicator"`
+	RiskID              int     `json:"risk_id"`
+	StopLoss            float64 `json:"stop_loss"`
+	TakeProfit          float64 `json:"take_profit"`
+	TrailingStop        float64 `json:"trailing_stop"`
+	PositionIdx         int     `json:"position_idx"`
+	Mode                string  `json:"mode"`
+}
+
 type PositionResponse struct {
 	BaseResult
 	Result Position `json:"result"`
@@ -277,6 +305,21 @@ type PositionArrayResponse struct {
 type PositionData struct {
 	IsValid bool     `json:"is_valid"`
 	Data    Position `json:"data"`
+}
+
+type LinearPositionArrayResponse struct {
+	BaseResult
+	Result []LinearPosition `json:"result"`
+}
+
+type LinearPositionDataArrayResponse struct {
+	BaseResult
+	Result []LinearPositionData `json:"result"`
+}
+
+type LinearPositionData struct {
+	IsValid bool           `json:"is_valid"`
+	Data    LinearPosition `json:"data"`
 }
 
 type Order struct {
