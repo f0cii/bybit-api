@@ -56,11 +56,17 @@ func (b *ByBit) LinearGetOrders(symbol string, orderStatus string, limit int, pa
 	return
 }
 
-// GetActiveOrders
-func (b *ByBit) LinearGetActiveOrders(symbol string) (query string, resp []byte, result OrderArrayResponse, err error) {
+// LinearGetActiveOrders Query real-time active order information. If only order_id or order_link_id are passed, a single order will be returned; otherwise, returns up to 500 unfilled orders.
+func (b *ByBit) LinearGetActiveOrders(symbol string, orderId string, orderLinkId string) (query string, resp []byte, result OrderArrayResponse, err error) {
 	var cResult OrderArrayResponse
 	params := map[string]interface{}{}
 	params["symbol"] = symbol
+	if orderId != "" {
+		params["order_id"] = orderId
+	}
+	if orderLinkId != "" {
+		params["order_link_id"] = orderLinkId
+	}
 	query, resp, err = b.SignedRequest(http.MethodGet, "private/linear/order/search", params, &cResult)
 	if err != nil {
 		return
@@ -114,17 +120,35 @@ func (b *ByBit) LinearCreateOrder(side string, orderType string, price float64,
 	return
 }
 
-// ReplaceOrder
-func (b *ByBit) LinearReplaceOrder(symbol string, orderID string, qty float64, price float64) (query string, resp []byte, result Order, err error) {
+// LinearReplaceOrder Replace order can modify/amend your active orders.
+func (b *ByBit) LinearReplaceOrder(symbol string, orderID string, orderLinkId string, qty float64, price float64,
+	takeProfit float64, stopLoss float64, tpTriggerBy string, slTriggerBy string) (query string, resp []byte, orderId string, err error) {
 	var cResult OrderResponse
 	params := map[string]interface{}{}
-	params["order_id"] = orderID
+	if orderID != "" {
+		params["order_id"] = orderID
+	}
+	if orderLinkId != "" {
+		params["order_link_id"] = orderLinkId
+	}
 	params["symbol"] = symbol
 	if qty > 0 {
 		params["p_r_qty"] = qty
 	}
 	if price > 0 {
 		params["p_r_price"] = price
+	}
+	if takeProfit > 0 {
+		params["take_profit"] = takeProfit
+	}
+	if stopLoss > 0 {
+		params["stop_loss"] = stopLoss
+	}
+	if tpTriggerBy != "" {
+		params["tp_trigger_by"] = tpTriggerBy
+	}
+	if slTriggerBy != "" {
+		params["sl_trigger_by"] = slTriggerBy
 	}
 	query, resp, err = b.SignedRequest(http.MethodPost, "private/linear/order/replace", params, &cResult)
 	if err != nil {
@@ -134,7 +158,7 @@ func (b *ByBit) LinearReplaceOrder(symbol string, orderID string, qty float64, p
 		err = fmt.Errorf("%v body: [%v]", cResult.RetMsg, string(resp))
 		return
 	}
-	result.OrderId = cResult.Result.OrderId
+	orderId = cResult.Result.OrderId
 	return
 }
 

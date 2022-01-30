@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// GetOrderBook
+// GetOrderBook Get the orderbook. Each side has a depth of 50.
 func (b *ByBit) GetOrderBook(symbol string) (query string, resp []byte, result OrderBook, err error) {
 	var ret GetOrderBookResult
 	params := map[string]interface{}{}
