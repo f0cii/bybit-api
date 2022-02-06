@@ -12,6 +12,8 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/tidwall/gjson"
 	"log"
+	"net/http"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -54,6 +56,7 @@ var (
 
 type Configuration struct {
 	Addr          string `json:"addr"`
+	Proxy         string `json:"proxy"` // http://127.0.0.1:1081
 	ApiKey        string `json:"api_key"`
 	SecretKey     string `json:"secret_key"`
 	AutoReconnect bool   `json:"auto_reconnect"`
@@ -81,9 +84,17 @@ func New(config *Configuration) *ByBitWS {
 		orderBookLocals: make(map[string]*OrderBookLocal),
 	}
 	b.ctx, b.cancel = context.WithCancel(context.Background())
+
 	b.conn = &recws.RecConn{
 		KeepAliveTimeout: 60 * time.Second,
 		NonVerbose:       true,
+	}
+	if config.Proxy != "" {
+		proxy, err := url.Parse(config.Proxy)
+		if err != nil {
+			return nil
+		}
+		b.conn.Proxy = http.ProxyURL(proxy)
 	}
 	b.conn.SubscribeHandler = b.subscribeHandler
 	return b

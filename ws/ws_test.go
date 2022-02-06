@@ -59,8 +59,9 @@ func handleOrder(data []*Order) {
 func TestOrderBookL2(t *testing.T) {
 	cfg := &Configuration{
 		Addr:          HostTestnet,
-		ApiKey:        "6IASD6KDBdunn5qLpT",
-		SecretKey:     "nXjZMUiB3aMiPaQ9EUKYFloYNd0zM39RjRWF",
+		Proxy:         "http://127.0.0.1:1081",
+		ApiKey:        "rwEwhfC6mDFYIGfcyb",
+		SecretKey:     "yfNJSzGapfFwbJyvguAyVXLJSIOCIegBg42Z",
 		AutoReconnect: true,
 		DebugMode:     true,
 	}
